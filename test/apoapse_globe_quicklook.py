@@ -679,7 +679,8 @@ def apoapse_globe_quicklook(orbit_number):
     draw_grid(ax, orbit_number)
 
     # show the figure
-    plt.savefig('apoapse_globe_orbit%.5d.png' %(orbit_number), dpi=300)
 
+    #plt.savefig('apoapse_globe_orbit%.5d.png' %(orbit_number), dpi=300)
+    plt.show()
 
 apoapse_globe_quicklook(3800)
