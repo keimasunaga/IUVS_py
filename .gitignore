@@ -1,0 +1,7 @@
+__pycache__/*
+.DS_Store
+.spyproject/*
+notebook/*
+script/__pycache__/*
+flgpkg/__pycache__/*
+test/__pycache__/*
