@@ -372,10 +372,11 @@ def pixel_globe(orbit_number, valid=False):
             vy = hdul['spacecraftgeometry'].data[i]['vy_instrument']
             vx = np.cross(vy, vspcnorm)
 
+            ## primary_array[0]: Ly-alpha, [1]: 1304, [2]: 1356
             for j in range(n_spa):
-                primary = primary_array[i,j,1] #O1356
-                solar = primary_array[i,j,0] #Lyman alpha
-                const = primary_array[i,j,2] #O1304
+                primary = primary_array[i,j,1] # This data will be used to plot
+                solar = primary_array[i,j,0]
+                const = primary_array[i,j,2]
                 if spec_bin == 40:
                     solar_max = 1.15
                     const_max = 2.
@@ -669,14 +670,14 @@ def apoapse_globe_quicklook(orbit_number):
     ax.axis('off')
 
     # calculate the pixel data grid
-    x, y, z = pixel_globe(orbit_number)
+    x, y, z = pixel_globe(orbit_number, valid=False)
 
     # display the pixel data grid using the colormap
-    img = ax.pcolormesh(x, y, z, cmap=NO_cmap('black'), norm=colors.PowerNorm(gamma=1/2, vmin=0, vmax=1.4))
+    img = ax.pcolormesh(x, y, z, cmap=NO_cmap('black'), norm=colors.PowerNorm(gamma=1/2, vmin=0, vmax=1.4)) ## gamma=1: Linear scale, gamma=1/2: squrt(I)
     #cb = ax.colorbar()
 
     # draw and the meridian/parallel grid
-    draw_grid(ax, orbit_number)
+    #draw_grid(ax, orbit_number)
 
     # show the figure
 
