@@ -7,3 +7,14 @@ import sys
 workpath = '/Users/masunaga/work/python_git/py_iuvs/'
 dirs = ['test', 'script']
 [sys.path.append(workpath + idir) for idir in dirs]
+
+## import reload function
+from importlib import reload
+
+## Setting for ipython to automatically reload modifications
+from IPython import get_ipython
+ipython = get_ipython()
+ipython.magic("%load_ext autoreload")
+ipython.magic("%autoreload 2")
+
+print('---- Read init function ----')
