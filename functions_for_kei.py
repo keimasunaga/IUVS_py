@@ -1,4 +1,5 @@
 import os
+import glob
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,10 +8,10 @@ from astropy.io import fits
 from skimage.transform import resize
 
 # data directory
-data_directory = '/Volumes/Samsung_T5/iuvs_data/'
+data_directory = '/Volumes/Gravity/work/data/maven_iuvs/'#'/Volumes/Samsung_T5/iuvs_data/'
 
 # SPICE kernel directory and paths
-spice_directory = '/Volumes/Samsung_T5/spice/'
+spice_directory = '/Volumes/Gravity/work/data/maven_iuvs/spice/'#'/Volumes/Samsung_T5/spice/'
 
 
 def beta_flip(hdul):
