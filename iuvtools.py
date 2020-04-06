@@ -196,7 +196,8 @@ def highres_swath_geometry(hdul, res=200):
     """
 
     # get the slit width in degrees
-    from .variables import slit_width as slit_width
+    #from .variables import slit_width as slit_width
+    slit_width = 10.64
 
     # calculate beta-flip state
     flipped = beta_flip(hdul)
