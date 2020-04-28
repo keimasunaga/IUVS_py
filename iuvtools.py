@@ -7,14 +7,21 @@ import spiceypy as spice
 from astropy.io import fits
 from skimage.transform import resize
 
+from myrc import IuvRc
+rc = IuvRc()
+
 # data directory
-data_directory = '/Volumes/Gravity/work/data/maven_iuvs/'#'/Volumes/Samsung_T5/iuvs_data/'
+data_directory = rc.dataloc#'/Volumes/Gravity/work/data/maven_iuvs/'#'/Volumes/Samsung_T5/iuvs_data/'
 
 # SPICE kernel directory and paths
-spice_directory = '/Volumes/Gravity/work/data/maven_iuvs/spice/'#'/Volumes/Samsung_T5/spice/'
+spice_directory = rc.spiceloc#'/Volumes/Gravity/work/data/maven_iuvs/spice/'#'/Volumes/Samsung_T5/spice/'
 
-pyuvs_directory = '/Users/masunaga/work/save_data/iuvs/'
+# Saved data directory
+pyuvs_directory = rc.saveloc#'/Users/masunaga/work/save_data/iuvs/'
 
+################################################
+## Apoapse analysis functions provided by Zac ##
+################################################
 def beta_flip(hdul):
     """
     Determine the spacecraft orientation and see if the APP is "beta-flipped," meaning rotated 180 degrees.
