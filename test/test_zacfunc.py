@@ -4,7 +4,7 @@ import numpy as np
 import glob
 import math
 
-
+import iuvtools
 
 def beta_flip(vi, vs):
 
@@ -202,18 +202,32 @@ def get_filename(orbit, mode='apoapse', uvch='fuv', lv='l2b', date='*', vr='*', 
 """
 #fname = 'mvn_iuv_l2b_apoapse-orbit03799-fuv_20160910T151814_v13_r02.fits'
 
+fnames = iuvtools.get_files(7008)
+hdul = fits.open(fnames[0])
+X, Y = iuvtools.angle_meshgrid(hdul)
+_, _, _, _, X, Y, cX, cY, context_map = iuvtools.highres_swath_geometry(hdul)
+context_map_colors = context_map.reshape(context_map.shape[0] * context_map.shape[1], context_map.shape[2])
+Y = (120 - Y) + 60  # reverse Y array so scan goes top-to-bottom instead of bottom-to-top
+#cY = (120 - cY) + 60  # reverse Y array so scan goes top-to-bottom instead of bottom-to-top
+plt.pcolormesh(X, Y, np.ones_like(X), color=context_map_colors, linewidth=0, edgecolors='none', rasterized=True).set_array(None)
+plt.show()
+import pdb; pdb.set_trace()
 ## Define file information and get file paths
 iuvfile = IuvFile()
-iuvfile.lv = 'l2b'
+iuvfile.lv = 'l1b'
 iuvfile.mode = 'apoapse'
-iuvfile.orbit = 3799#3780#6321#3799
+iuvfile.orbit = 7008#3780#6321#3799
 iuvfile.uvch = 'fuv'
 filepaths = iuvfile.get_path()
 ndat = len(filepaths)
 ncol  = 2
 nrow = int(ndat/ncol)
+print(filepaths)
+iuvdat = IuvData(filepaths)
+iuvdat.open()
+x, y, z = iuvtools.angle_meshgrid(iuvdat.hdul)
 
-
+import pdb; pdb.set_trace()
 #iuvdat = IuvData(filepaths[0])
 #iuvdat.open()
 #hdul = iuvdat.hdul
@@ -231,6 +245,7 @@ ltdat_arr = np.zeros([1, 10])
 swath_dic = swath_geometry(filepaths)
 swath_number = swath_dic['swath_number']
 beta_flip = swath_dic['beta_flip']
+import pdb; pdb.set_trace()
 
 for i, ipath in enumerate(filepaths):#[::-1]
     iuvdat = IuvData(ipath)
@@ -265,6 +280,7 @@ for i, ipath in enumerate(filepaths):#[::-1]
         img = ax.pcolormesh(X, Y, img1304, vmin=0, vmax=1.5, cmap=cmap)
     except:
         continue
+
 print(np.max(ltdat_arr))
 #print(img1304_arr.shape)
 idx = np.where((ltdat_arr >= 11.5) & (ltdat_arr <= 12.5))

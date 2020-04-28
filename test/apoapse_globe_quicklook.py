@@ -677,7 +677,7 @@ def apoapse_globe_quicklook(orbit_number):
     #cb = ax.colorbar()
 
     # draw and the meridian/parallel grid
-    #draw_grid(ax, orbit_number)
+    draw_grid(ax, orbit_number)
 
     # show the figure
 

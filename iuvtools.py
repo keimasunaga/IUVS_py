@@ -13,6 +13,7 @@ data_directory = '/Volumes/Gravity/work/data/maven_iuvs/'#'/Volumes/Samsung_T5/i
 # SPICE kernel directory and paths
 spice_directory = '/Volumes/Gravity/work/data/maven_iuvs/spice/'#'/Volumes/Samsung_T5/spice/'
 
+pyuvs_directory = '/Users/masunaga/work/save_data/iuvs/'
 
 def beta_flip(hdul):
     """
