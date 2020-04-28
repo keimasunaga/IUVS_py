@@ -22,6 +22,54 @@ pyuvs_directory = rc.saveloc#'/Users/masunaga/work/save_data/iuvs/'
 ################################################
 ## Apoapse analysis functions provided by Zac ##
 ################################################
+def get_files(orbit_number, data_directory=data_directory, segment='apoapse', channel='muv', count=False):
+    """
+    Return file paths to FITS files for a given orbit number.
+
+    Parameters
+    ----------
+    orbit_number : int
+        The MAVEN orbit number.
+    data_directory : str
+        Absolute system path to the location containing orbit block folders ("orbit01300", orbit01400", etc.)
+    segment : str
+        The orbit segment for which you want data files. Defaults to 'apoapse'.
+    channel : str
+        The instrument channel. Defaults to 'muv'.
+    count : bool
+        Whether or not to return the number of files.
+
+    Returns
+    -------
+    files : array
+        A sorted list of the file paths to the FITS files.
+    n_files : int
+        The number of files.
+    """
+
+    # determine orbit block (directories which group data by 100s)
+    orbit_block = int(orbit_number / 100) * 100
+
+    # location of FITS files (this will change depending on the user)
+    filepath = os.path.join(data_directory, 'level1b/orbit%.5d/' % (orbit_block))
+
+    # format of FITS file names
+    filename_str = '*%s-orbit%.5d-%s*.fits.gz' % (segment, orbit_number, channel)
+
+    # get list of files
+    files = sorted(glob.glob(os.path.join(filepath, filename_str)))
+
+    # get number of files
+    n_files = int(len(files))
+
+    # return the list of files with the count if requested
+    if count == False:
+        return files
+    else:
+        return files, n_files
+
+
+
 def beta_flip(hdul):
     """
     Determine the spacecraft orientation and see if the APP is "beta-flipped," meaning rotated 180 degrees.
@@ -461,48 +509,144 @@ def angle_meshgrid(hdul):
     return X, Y
 
 
-def get_files(orbit_number, data_directory=data_directory, segment='apoapse', channel='muv', count=False):
+def pixel_globe(orbit_number, valid=False):
+
     """
-    Return file paths to FITS files for a given orbit number.
+    Make a pixel grid of IUVS nightside swaths, approximating the view from MAVEN's apoapsis.
 
     Parameters
     ----------
     orbit_number : int
-        The MAVEN orbit number.
-    data_directory : str
-        Absolute system path to the location containing orbit block folders ("orbit01300", orbit01400", etc.)
-    segment : str
-        The orbit segment for which you want data files. Defaults to 'apoapse'.
-    channel : str
-        The instrument channel. Defaults to 'muv'.
-    count : bool
-        Whether or not to return the number of files.
+        I bet you can figure this one out...
+    valid : bool
+        If true (default), then it applies the pixel validation criteria developed by Nick, Sonal, and Zac
+        in January 2019. If false, then it displays the data as observed, without any filtering of
+        cosmic rays, stray sunlight, SZA, etc.
 
     Returns
     -------
-    files : array
-        A sorted list of the file paths to the FITS files.
-    n_files : int
-        The number of files.
+    x : array
+        Horizontal pixel edges in kilometers from the center of Mars.
+    y : array
+        Vertical pixel edges in kilometers from the center of Mars.
+    z : array
+        Grid of projected pixel brightnesses.
     """
 
-    # determine orbit block (directories which group data by 100s)
-    orbit_block = int(orbit_number / 100) * 100
+    # dimensions of pixel grid and width of a pixel in kilometers
+    pixsize = 100 #20 #[km/pixel]
+    xsize = int(8000/pixsize)
+    ysize = int(8000/pixsize)
 
-    # location of FITS files (this will change depending on the user)
-    filepath = os.path.join(data_directory, 'level1b/orbit%.5d/' % (orbit_block))
+    # grid to hold sum of values falling in each pixel and a count of number of values in each pixel
+    total = np.zeros((ysize,xsize))
+    count = np.zeros((ysize,xsize))
 
-    # format of FITS file names
-    filename_str = '*%s-orbit%.5d-%s*.fits.gz' % (segment, orbit_number, channel)
+    # list of FITS files for given orbit number with error handling
+    files, n_files = get_files(orbit_number, count=True)
+    if n_files == 0:
+        raise ValueError('Invalid orbit number.')
 
-    # get list of files
-    files = sorted(glob.glob(os.path.join(filepath, filename_str)))
+    # variable to hold beta flip value
+    flip = -1
 
-    # get number of files
-    n_files = int(len(files))
+    # loop through FITS files
+    for f in range(len(files)):
 
-    # return the list of files with the count if requested
-    if count == False:
-        return files
-    else:
-        return files, n_files
+        # open FITS file
+        hdul = fits.open(files[f])
+
+        # determine dimensions, and if it's a single integration, skip it
+        dims = hdul['primary'].shape
+        primary_array = hdul['primary'].data
+        if len(dims) != 3:
+            continue #skip single integrations
+        n_int = dims[0]
+        n_spa = dims[1]
+
+        # also skip dayside
+        if hdul['observation'].data['mcp_volt'] < 790:
+            continue
+
+        # get number of spectral bins
+        spec_bin = np.shape(hdul['observation'].data['wavelength'][0][1])[0]
+
+        # get vectors for determining beta flip
+        if flip == -1:
+            vi = hdul['spacecraftgeometry'].data['vx_instrument_inertial'][-1]
+            vs = hdul['spacecraftgeometry'].data['v_spacecraft_rate_inertial'][-1]
+            flip = beta_flip(vi,vs)
+
+        # fit spectra
+        #primary_array = MLR(hdul)
+
+        # this is copied directly from Sonal; someday I'll figure it out and comment...
+        # essentially it finds the place where the pixel position vector intersects the 400x400 grid
+        # and places the pixel value in that location
+        for i in range(n_int):
+            vspc = hdul['spacecraftgeometry'].data[i]['v_spacecraft']
+            vspcnorm = vspc/np.linalg.norm(vspc)
+            vy = hdul['spacecraftgeometry'].data[i]['vy_instrument']
+            vx = np.cross(vy, vspcnorm)
+
+            ## primary_array[0]: Ly-alpha, [1]: 1304, [2]: 1356
+            for j in range(n_spa):
+                primary = primary_array[i,j,1] # This data will be used to plot
+                solar = primary_array[i,j,0]
+                const = primary_array[i,j,2]
+                if spec_bin == 40:
+                    solar_max = 1.15
+                    const_max = 2.
+                elif spec_bin == 174:
+                    solar_max = 5.
+                    const_max = 9.2
+
+                # if valid is true, then eliminate pixels which fail validation criteria
+                if valid == True:
+                    if (solar > solar_max) | (const > const_max):
+                        continue
+                    else:
+                        #primary = radiance_multiplier(primary, spec_bin)
+                        for m in range(4):
+                            try:
+                                vpix = hdul['pixelgeometry'].data[i]['pixel_vec']
+                                vpixcorner = (np.squeeze(vpix[:,j,m]) + np.squeeze(vpix[:,j,4]))/2
+                                vdiff = vspc - (np.dot(vspc,vpixcorner)*vpixcorner)
+                                x = int(np.dot(vdiff,vx)*np.linalg.norm(vdiff) / np.linalg.norm([np.dot(vdiff,vx),np.dot(vdiff,vy)]) /pixsize+xsize/2)
+                                y = int(np.dot(vdiff,vy)*np.linalg.norm(vdiff) / np.linalg.norm([np.dot(vdiff,vx),np.dot(vdiff,vy)]) /pixsize+ysize/2)
+                                if (x >= 0) & (y >= 0):
+                                    total[y,x] += primary
+                                    count[y,x] += 1
+                            except:
+                                continue
+
+                # if validation turned off, then don't filter any pixels
+                elif valid == False:
+                    #primary = radiance_multiplier(primary, spec_bin)
+                    for m in range(4):
+                        try:
+                            vpix = hdul['pixelgeometry'].data[i]['pixel_vec']
+                            vpixcorner = (np.squeeze(vpix[:,j,m]) + np.squeeze(vpix[:,j,4]))/2
+                            vdiff = vspc - (np.dot(vspc,vpixcorner)*vpixcorner)
+                            x = int(np.dot(vdiff,vx)*np.linalg.norm(vdiff) / np.linalg.norm([np.dot(vdiff,vx),np.dot(vdiff,vy)]) /pixsize+xsize/2)
+                            y = int(np.dot(vdiff,vy)*np.linalg.norm(vdiff) / np.linalg.norm([np.dot(vdiff,vx),np.dot(vdiff,vy)]) /pixsize+ysize/2)
+                            if (x >= 0) & (y >= 0):
+                                    total[y,x] += primary
+                                    count[y,x] += 1
+                        except:
+                            continue
+
+
+    #calculate the average
+    #total[np.where(count == 0)] = np.nan
+    z = total/count
+
+    # beta-flip if necessary
+    if flip == True:
+        z = np.fliplr(z)
+
+    #make coordinate grids for each pixel in kilometers
+    x, y = np.meshgrid(np.linspace(-xsize/2*pixsize, xsize/2*pixsize, xsize), np.linspace(-ysize/2*pixsize, ysize/2*pixsize, ysize))
+
+    #return the coordinate grids and the spherically-projected data pixels
+    return x, y, z
