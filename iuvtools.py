@@ -575,7 +575,7 @@ def pixel_globe(orbit_number, valid=False):
         if flip == -1:
             #vi = hdul['spacecraftgeometry'].data['vx_instrument_inertial'][-1]
             #vs = hdul['spacecraftgeometry'].data['v_spacecraft_rate_inertial'][-1]
-            flip = beta_flip(hudl)
+            flip = beta_flip(hdul)
 
         # fit spectra
         #primary_array = MLR(hdul)
