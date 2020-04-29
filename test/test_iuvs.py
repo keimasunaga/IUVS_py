@@ -221,7 +221,7 @@ nrow = int(ndat/ncol)
 #iuvdat.close()
 #geom = iuvdat.hdul['PixelGeometry']
 ## Create figure and axis objects
-fig, ax = plt.subplots(1,1, figsize=[15,8])
+fig, ax = plt.subplots(2,1, figsize=[15,8])
 cmap = plt.get_cmap('Blues_r')
 slit_width = 10.64 #[degree]
 img_lst = []
@@ -262,7 +262,8 @@ for i, ipath in enumerate(filepaths):#[::-1]
 
     # display image
     try:
-        img = ax.pcolormesh(X, Y, img1304, vmin=0, vmax=1.5, cmap=cmap)
+        img = ax[0].pcolormesh(X, Y, img1304, vmin=0, vmax=1.5, cmap=cmap)
+        ax[1].pcolormesh(X, Y, np.ones_like(X), color=context_map_colors, linewidth=0, edgecolors='none', rasterized=True).set_array(None)
     except:
         continue
 print(np.max(ltdat_arr))
