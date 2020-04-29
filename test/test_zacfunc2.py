@@ -7,22 +7,39 @@ import math
 import iuvtools  ## functions_for_kei.py was renamed as iuvtools.py
 import spicetools
 
-# furnish SPICE kernels
-spicetools.load_iuvs_spice()
-from importlib import reload
-reload(iuvtools)
-fnames = iuvtools.get_files(6350)
 
-#for i in range(len(fnames)):
-#print(i)
-hdul = fits.open(fnames[0])
-#X, Y = iuvtools.angle_meshgrid(hdul)   ##
-lat, lon, sza, lt, x, y, cx, cy, context_map = iuvtools.highres_swath_geometry(hdul)
-context_map_colors = context_map.reshape(context_map.shape[0] * context_map.shape[1], context_map.shape[2])
-y = (120 - y) + 60  # reverse Y array so scan goes top-to-bottom instead of bottom-to-top
-cy = (120 - cy) + 60  # reverse Y array so scan goes top-to-bottom instead of bottom-to-top
-plt.pcolormesh(x, y, np.ones_like(x), color=context_map_colors, linewidth=0, edgecolors='none', rasterized=True).set_array(None)
-iuvtools.latlon_grid(cx, cy, lat, lon, plt.gca())
+
+# furnish SPICE kernels
+#spicetools.load_iuvs_spice()
+
+orbit_number = 6350
+#x, y, z = iuvtools.pixel_globe(orbit_number)
+fnames = iuvtools.get_files(orbit_number)
+#swathinfo = iuvtools.swath_geometry(orbit_number)
+#print(np.array(fnames), len(fnames))
+#print(swathinfo['filepaths'], np.size(swathinfo['filepaths']))
+
+#fnames = swathinfo['filepaths']
+#n_swaths = swathinfo['n_swaths']
+#swath_number = swathinfo['swath_number']
+#dayside = swathinfo['dayside']
+#idx_dayside = np.array([bool(ib) for ib in dayside])
+#flipped = swathinfo['beta_flip']
+#fnames_day = fnames[idx_dayside]
+
+fig = plt.figure(figsize=(12,12))
+
+for i, ifname in enumerate(fnames):
+    hdul = fits.open(ifname)
+    print(hdul['Observation'].data['MCP_volt'])
+    #lat, lon, sza, lt, x, y, cx, cy, context_map = iuvtools.highres_swath_geometry(hdul)
+    #context_map_colors = context_map.reshape(context_map.shape[0] * context_map.shape[1], context_map.shape[2])
+    #y = (120 - y) + 60  # reverse Y array so scan goes top-to-bottom instead of bottom-to-top
+    #cy = (120 - cy) + 60  # reverse Y array so scan goes top-to-bottom instead of bottom-to-top
+    #ax = fig.add_subplot(1,n_swaths,i+1)
+    #ax.pcolormesh(x, y, np.ones_like(x), color=context_map_colors, linewidth=0, edgecolors='none', rasterized=True).set_array(None)
+    #iuvtools.latlon_grid(cx, cy, lat, lon, ax)
+
 #import pdb; pdb.set_trace()
 plt.show()
 
