@@ -586,7 +586,7 @@ def get_apoapse_files(orbit_number, directory=data_directory):
     """
 
     # get list of FITS files for given orbit number
-    files, n_files = get_files(orbit_number, directory=directory, segment='apoapse', channel='muv',
+    files, n_files = get_files(orbit_number, directory=directory, segment='apoapse', channel='fuv',
                                count=True)
 
     # set initial counters
