@@ -13,6 +13,9 @@ spiceloc = IuvRc().spiceloc
 # product directory'
 productloc = IuvRc().saveloc
 
+# PyUVS directory
+pyuvs_directory = '/Users/masunaga/work/python_git/maven/iuvs/lib/PyUVS'
+
 # VM access info
 vm_username = 'username'
 vm_password = 'password'
