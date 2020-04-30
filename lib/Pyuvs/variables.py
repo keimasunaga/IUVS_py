@@ -1,11 +1,14 @@
+from myrc import IuvRc
+rc = IuvRc()
+
 # data directory
-data_directory = '/Volumes/Samsung_T5/iuvs_data/'
+data_directory = rc.dataloc
 
 # SPICE kernel directory and paths
-spice_directory = '/Volumes/Samsung_T5/spice/'
+spice_directory = rc.spiceloc
 
 # PyUVS directory'
-pyuvs_directory = '/Users/milby/Documents/Work/MAVEN/Python/PyUVS'
+pyuvs_directory = rc.saveloc
 
 # VM access info
 vm_username = 'username'
