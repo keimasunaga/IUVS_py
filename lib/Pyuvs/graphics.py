@@ -25,7 +25,7 @@ color_dict = {'red': '#D62728', 'orange': '#FF7F0E', 'yellow': '#FDB813',
 def JGR_format(dpi=300, display_widths=False, return_blue=False):
     """
     Sets matplotlib.pyplot parameters to match fonts and sizes to those of AGU's JGR and GRL journals.
-    
+
     Parameters
     ----------
     dpi : int
@@ -35,7 +35,7 @@ def JGR_format(dpi=300, display_widths=False, return_blue=False):
         Whether or not to print out the widths of the various types of JGR figures. Reference for figure creation.
     return_blue : bool
         If True, returns the hexadecimal color string for the dark blue color used in JGR publications.
-        
+
     Returns
     -------
     JGR_blue : str
@@ -146,14 +146,14 @@ def colorbar(mappable, axis, ticks=None, ticklabels=None, boundaries=None, minor
 def NO_colormap(bad=None, n=256):
     """
     Generates the NO nightglow black/green/yellow-green/white colormap (IDL #8).
-    
+
     Parameters
     ----------
     bad : (3,) tuple
         Normalized color tuple (R,G,B) for missing data (NaN) display. Defaults to None (bad values are masked).
     n : int
         Number of colors to generate. Defaults to 256.
-        
+
     Returns
     -------
     cmap : object
@@ -183,14 +183,14 @@ def NO_colormap(bad=None, n=256):
 def aurora_colormap(bad=None, n=256):
     """
     Generates the custom aurora black/pink/white colormap.
-    
+
     Parameters
     ----------
     bad : (3,) tuple
         Normalized color tuple (R,G,B) for missing data (NaN) display. Defaults to None (bad values are masked).
     n : int
         Number of colors to generate. Defaults to 256.
-        
+
     Returns
     -------
     cmap : object
@@ -220,14 +220,14 @@ def aurora_colormap(bad=None, n=256):
 def H_colormap(bad=None, n=256):
     """
     Generates the hydrogen Lyman-alpha black/blue/white colormap (IDL #1).
-    
+
     Parameters
     ----------
     bad : (3,) tuple
         Normalized color tuple (R,G,B) for missing data (NaN) display. Defaults to None (bad values are masked).
     n : int
         Number of colors to generate. Defaults to 256.
-        
+
     Returns
     -------
     cmap : object
@@ -257,14 +257,14 @@ def H_colormap(bad=None, n=256):
 def rainbow_colormap(bad=None, n=256):
     """
     Generates a custom rainbow colormap based on my custom color dictionary.
-    
+
     Parameters
     ----------
     bad : (3,) tuple
         Normalized color tuple (R,G,B) for missing data (NaN) display. Defaults to None (bad values are masked).
     n : int
         Number of colors to generate. Defaults to 256.
-        
+
     Returns
     -------
     cmap : object
@@ -317,14 +317,14 @@ def find_nearest_index(wavs, value):
 def get_flatfield(n_integrations, n_spatial):
     """
     Loads the detector flatfield and stacks it by the number of integrations.
-    
+
     Parameters
     ----------
     n_integrations : int
         The number of integrations in a sub-swath (FITS file).
     n_spatial : int
         The number of spatial bins along the slit.
-    
+
     Returns
     -------
     flatfield : array
@@ -333,11 +333,11 @@ def get_flatfield(n_integrations, n_spatial):
 
     # load the flatfield, interpolate if required using the 133-bin flatfield
     if n_spatial == 133:
-        detector_flat = np.load(os.path.join(pyuvs_directory, 'ancillary/mvn_iuv_flatfield-133spa-muv.npy'))[:, :18]
+        detector_flat = np.load(os.path.join(pyuvs_directory, 'ancillary/mvn_iuv_flatfield-133spa-muv.npy'), allow_pickle=True)[:, :18]
     elif n_spatial == 50:
-        detector_flat = np.load(os.path.join(pyuvs_directory, 'ancillary/mvn_iuv_flatfield-50spa-muv.npy'))[:, :18]
+        detector_flat = np.load(os.path.join(pyuvs_directory, 'ancillary/mvn_iuv_flatfield-50spa-muv.npy'), allow_pickle=True)[:, :18]
     else:
-        detector_full = np.load(os.path.join(pyuvs_directory, 'ancillary/mvn_iuv_flatfield-133spa-muv.npy'))[:, :18]
+        detector_full = np.load(os.path.join(pyuvs_directory, 'ancillary/mvn_iuv_flatfield-133spa-muv.npy'), allow_pickle=True)[:, :18]
         detector_flat = np.zeros((n_spatial, 18))
         for i in range(18):
             detector_flat[:, i] = np.interp(np.linspace(0, 132, n_spatial), np.arange(133), detector_full[:, i])
@@ -353,12 +353,12 @@ def get_orbit_rgb(files):
     """
     Open all dayside FITS files for a given orbit and extract RGB values of pixels on the disk and with
     a solar zenith angle less than 102 degrees (dayside or twilight only).
-    
+
     Parameters
     ----------
     files : list, arr
         String filepaths of the input FITS files for the orbit.
-    
+
     Returns
     -------
     dn_colors : array
@@ -467,12 +467,12 @@ def get_orbit_rgb(files):
 def find_heq_scaling(dn_colors):
     """
     Find the histogram bin edges for a given set of RGB DN values.
-    
+
     Parameters
     ----------
     dn_colors : array
         An (n,3) array of RGB tuples for histogram-equalization generated by get_orbit_rgb().
-        
+
     Returns
     -------
     red_heq : array
@@ -517,14 +517,14 @@ def colorize_pixel(pixel, rgb_histogram):
     """
     Take an individual pixel's RGB in DN and return a histogram-equalized RGB tuple on domain [0,1]
     for display with matplotlib.pyplot.pcolormesh().
-    
+
     Parameters
     ----------
     pixel : list, array
         Pixel color as RGB tuple in DN.
     rgb_histogram : array
         Color channel histograms with shape (3,256).
-        
+
     Returns
     -------
     pixel_rgb : array
@@ -709,7 +709,7 @@ def nightside_pixels(hdul, feature='NO'):
     spectral_bins = 1024/spe_bin_width
     if (spectral_bins == 256) or (spectral_bins == 512) or (spectral_bins == 1024):
         template_filepath = os.path.join(pyuvs_directory, 'ancillary/mvn_iuv_templates-%ispe-muv.npy' % spectral_bins)
-        templates = np.load(template_filepath)
+        templates = np.load(template_filepath, allow_pickle=True)
         template_wavelength = templates.item().get('wavelength')
         template_solar_continuum = templates.item().get('solar_continuum')
         template_co_cameron = templates.item().get('co_cameron')
@@ -720,7 +720,7 @@ def nightside_pixels(hdul, feature='NO'):
     else:
         wavelength = hdul['observation'].data[0]['wavelength'][0]
         template_filepath = os.path.join(pyuvs_directory, 'ancillary/mvn_iuv_templates-1024spe-muv.npy')
-        templates = np.load(template_filepath)
+        templates = np.load(template_filepath, allow_pickle=True)
         template_wavelength = wavelength
         template_solar_continuum = np.interp(wavelength, templates.item().get('wavelength'),
                                              templates.item().get('solar_continuum'))

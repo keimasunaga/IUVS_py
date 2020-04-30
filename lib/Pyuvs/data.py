@@ -18,7 +18,7 @@ from .variables import vm_username, vm_password, data_directory, pyuvs_directory
 def ignore_hidden_folder(folder_list):
     """
     Takes a list of folder names and ignores hidden folders.
-    
+
     Parameters
     ----------
     folder_list : array-like
@@ -76,15 +76,15 @@ def get_vm_folders(vm_name, username, password, folder_path):
 def update_spice_kernels(remote_spice_path, local_spice_path):
     """
     Updates the spice kernels by syncing the currently-used spice kernels with the VM.
-    
+
     Parameters
     ----------
     remote_spice_path : str
         Path to the SPICE kernels on the VM.
-    
+
     local_spice_path : str
         Path to the location of SPICE kernels on your system.
-    
+
     Returns
     -------
     None.
@@ -453,14 +453,14 @@ def get_file_names(file_list):
 def sync_data(spice=True, l1b=True):
     """
     Synchronize new data from the VM and remove any old files that have been replaced by newer versions.
-    
+
     Parameters
     ----------
     spice : bool
         Whether or not to sync SPICE kernels. Defaults to True.
     l1b : bool
         Whether or not to sync level 1B data. Defaults to True.
-    
+
     Returns
     -------
     None.
@@ -712,7 +712,7 @@ def calculate_calibration_curve(hdul, wavelengths):
     pixel_omega = pixel_size_mm/focal_length_mm * slit_width_mm/focal_length_mm
 
     # load IUVS sensitivity curve
-    muv_sensitivity = np.load(os.path.join(pyuvs_directory, 'ancillary/mvn_iuv_sensitivity-muv.npy'))
+    muv_sensitivity = np.load(os.path.join(pyuvs_directory, 'ancillary/mvn_iuv_sensitivity-muv.npy'), allow_pickle=True)
 
     # shift wavelength by 7 nm redward and interpolate sensitivity curve to given wavelengths
     wavelength_shift = 7.0
