@@ -1,5 +1,3 @@
-
-
 class IuvRc:
     def __init__(self):
         self.dataloc = '/Volumes/Gravity/work/data/maven_iuvs/'
