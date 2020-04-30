@@ -1,14 +1,11 @@
-from myrc import IuvRc
-rc = IuvRc()
-
 # data directory
-data_directory = rc.dataloc
+data_directory = '/Volumes/Gravity/work/data/maven_iuvs/'
 
 # SPICE kernel directory and paths
-spice_directory = rc.spiceloc
+spice_directory = '/Volumes/Gravity/work/data/maven_iuvs/spice/'
 
 # PyUVS directory'
-pyuvs_directory = rc.saveloc
+pyuvs_directory = '/Users/masunaga/work/python_git/maven/iuvs/lib/PyUVS'
 
 # VM access info
 vm_username = 'username'
