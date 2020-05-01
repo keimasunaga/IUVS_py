@@ -561,7 +561,7 @@ def get_files(orbit_number, directory=data_directory, level='l2b', segment='apoa
         return files, n_files
 
 
-def get_apoapse_files(orbit_number, directory=data_directory):
+def get_apoapse_files(orbit_number, directory=data_directory, level='l2b', channel='fuv'):
     """
     Convenience function for apoapse data. In addition to returning file paths to the data, it determines how many
     swaths were taken, which swath each file belongs to since there are often 2-3 files per swath, whether the MCP
@@ -586,7 +586,7 @@ def get_apoapse_files(orbit_number, directory=data_directory):
     """
 
     # get list of FITS files for given orbit number
-    files, n_files = get_files(orbit_number, directory=directory, segment='apoapse', channel='fuv',
+    files, n_files = get_files(orbit_number, directory=directory, level=level, segment='apoapse', channel=channel,
                                count=True)
 
     # set initial counters
@@ -651,7 +651,7 @@ def get_apoapse_files(orbit_number, directory=data_directory):
     return swath_info
 
 
-def get_file_version(orbit_number, directory=data_directory, segment='apoapse', channel='muv'):
+def get_file_version(orbit_number, directory=data_directory, level='l2b', segment='apoapse', channel='muv'):
     """
     Return file version and revision of FITS files for a given orbit number.
 
@@ -674,7 +674,7 @@ def get_file_version(orbit_number, directory=data_directory, segment='apoapse', 
 
     # get files and extract data versions; if no files version is 'missing'
     try:
-        files = get_files(orbit_number, directory=directory, segment=segment, channel=channel)
+        files = get_files(orbit_number, directory=directory, level=level, segment=segment, channel=channel)
         version_str = files[0].split('_')[-2:]
         data_version = '%s_%s' % (version_str[0], version_str[1][0:3])
     except IndexError:
