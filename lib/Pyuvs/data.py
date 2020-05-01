@@ -514,7 +514,7 @@ def sync_data(spice=True, l1b=True):
     print('Data syncing and cleanup took %.2d:%.2d:%.2d.' % (h, m, s))
 
 
-def get_files(orbit_number, directory=data_directory, segment='apoapse', channel='muv', count=False):
+def get_files(orbit_number, directory=data_directory, level='l2b', segment='apoapse', channel='muv', count=False):
     """
     Return file paths to FITS files for a given orbit number.
 
@@ -543,7 +543,7 @@ def get_files(orbit_number, directory=data_directory, segment='apoapse', channel
     orbit_block = int(orbit_number / 100) * 100
 
     # location of FITS files (this will change depending on the user)
-    filepath = os.path.join(directory, 'level1b/orbit%.5d/' % orbit_block)
+    filepath = os.path.join(directory, 'level'+level[1:]+'/orbit%.5d/' % orbit_block)
 
     # format of FITS file names
     filename_str = '*%s-orbit%.5d-%s*.fits.gz' % (segment, orbit_number, channel)
