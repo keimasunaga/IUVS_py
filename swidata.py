@@ -1,0 +1,149 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.dates as mdates
+import cdflib
+import common.tools as ctools
+
+from PyUVS.time import et2datetime
+from variables import pfpdataloc
+from PyUVS.time import et2datetime
+
+
+class SwiSpec:
+    def __init__(self, cdf):
+        self.et = cdf.varget('time_met')
+        self.timeDt = np.array([et2datetime(iet) for iet in self.et])
+        self._remove_tzinfo()
+        self.data = cdf.varget('spectra_diff_en_fluxes')
+        self.v = cdf.varget('energy_spectra')
+
+    def _remove_tzinfo(self):
+        self.timeDt = np.array([iDt.replace(tzinfo=None) for iDt in self.timeDt])
+
+    def get_energy_time_grids(self):
+        mt = np.array([mdates.date2num(iDt) for iDt in self.timeDt])
+        shifted_mt = np.r_[mt[0], mt[1:] - np.diff(mt)*0.5, mt[-1]]
+        shifted_v = np.r_[self.v[0], self.v[1:] - np.diff(self.v)*0.5, self.v[-1]]
+        return shifted_mt, shifted_v
+
+    def plot(self, ax=None, xylabels=True, **kwargs):
+        mt, energy = self.get_energy_time_grids()
+        mt = np.array([mdates.date2num(iDt) for iDt in self.timeDt])
+
+        if ax is None:
+            plt.pcolormesh(mt, energy, self.data.T, **kwargs)
+        else:
+            ax.pcolormesh(mt, energy, self.data.T, **kwargs)
+
+        plt.gca().set_yscale('log')
+        date_format = mdates.DateFormatter('%H:%M:%S')
+        plt.gca().xaxis.set_major_formatter(date_format)
+        if xylabels:
+            plt.gca().set_xlabel('Time')
+            plt.gca().set_ylabel('Energy [eV]')
+            plt.gca().set_ylim(25, 2.5e4)
+
+    def append(self, other):
+        self.timeDt = np.append(self.timeDt, other.timeDt)
+        self.data = np.append(self.data, other.data, axis=0)
+
+
+class SwimDens:
+    def __init__(self, cdf):
+        self.et = cdf.varget('time_met')
+        self.timeDt = np.array([et2datetime(iet) for iet in self.et])
+        self._remove_tzinfo()
+        self.data = cdf.varget('density')
+
+    def _remove_tzinfo(self):
+        self.timeDt = np.array([iDt.replace(tzinfo=None) for iDt in self.timeDt])
+
+    def plot(self, ax=None, xylabels=True, **kwargs):
+        if ax is None:
+            plt.plot(self.timeDt, self.data, **kwargs)
+        else:
+            ax.plot(self.timeDt, self.data, **kwargs)
+        if xylabels:
+            plt.gca().set_xlabel('Time')
+            plt.gca().set_ylabel('Density [cm-3]')
+
+    def append(self, other):
+        self.timeDt = np.append(self.timeDt, other.timeDt)
+        self.data = np.append(self.data, other.data)
+
+    def get_mean(self, Dtrange=None):
+        idx = ctools.nnDt(self.timeDt, Dtrange)
+        return np.mean(self.data[idx[0]:idx[1]])
+
+    def get_std(self, Dtrange=None):
+        idx = ctools.nnDt(self.timeDt, Dtrange)
+        return np.std(self.data[idx[0]:idx[1]])
+
+
+class SwimVel:
+    def __init__(self, cdf):
+        self.et = cdf.varget('time_met')
+        self.timeDt = np.array([et2datetime(iet) for iet in self.et])
+        self._remove_tzinfo()
+        self.data = cdf.varget('velocity_mso')
+        self.data_t = np.linalg.norm(self.data, axis=1)
+
+    def _remove_tzinfo(self):
+        self.timeDt = np.array([iDt.replace(tzinfo=None) for iDt in self.timeDt])
+
+    def plot_x(self, ax=None, **kwargs):
+        if ax is None:
+            plt.plot(self.timeDt, self.data[:,0], **kwargs)
+        else:
+            ax.plot(self.timeDt, self.data[:,0], **kwargs)
+
+    def plot_y(self, ax=None, **kwargs):
+        if ax is None:
+            plt.plot(self.timeDt, self.data[:,1], **kwargs)
+        else:
+            ax.plot(self.timeDt, self.data[:,1], **kwargs)
+
+    def plot_z(self, ax=None, **kwargs):
+        if ax is None:
+            plt.plot(self.timeDt, self.data[:,2], **kwargs)
+        else:
+            ax.plot(self.timeDt, self.data[:,2], **kwargs)
+
+    def plot_t(self, ax=None, **kwargs):
+        if ax is None:
+            plt.plot(self.timeDt, self.data_t, **kwargs)
+        else:
+            ax.plot(self.timeDt, self.data_t, **kwargs)
+
+    def append(self, other):
+        self.timeDt = np.append(self.timeDt, other.timeDt)
+        self.data = np.append(self.data, other.data, axis=0)
+        self.data_t = np.append(self.data_t, other.data_t)
+
+    def get_mean(self, Dtrange=None):
+        idx = ctools.nnDt(self.timeDt, Dtrange)
+        return np.mean(self.data[idx[0]:idx[1],:], axis=0)
+
+    def get_std(self, Dtrange=None):
+        idx = ctools.nnDt(self.timeDt, Dtrange)
+        return np.std(self.data[idx[0]:idx[1],:], axis=0)
+
+def test():
+
+    ## Fix later: Currently spice has to be read before using this module.
+    import PyUVS.spice as Pyspice ##
+    Pyspice.load_iuvs_spice()
+
+    fswi_mom = pfpdataloc + 'swi/l2/2019/07/mvn_swi_l2_onboardsvymom_20190707_v01_r01.cdf'
+    fswi_mom2 = pfpdataloc + 'swi/l2/2019/07/mvn_swi_l2_onboardsvymom_20190708_v01_r01.cdf'
+    fswi_spec = pfpdataloc + 'swi/l2/2019/07/mvn_swi_l2_onboardsvyspec_20190707_v01_r01.cdf'
+    fswi_spec2 = pfpdataloc + 'swi/l2/2019/07/mvn_swi_l2_onboardsvyspec_20190708_v01_r01.cdf'
+    cdf_spec = cdflib.CDF(fswi_spec)
+    cdf_spec2 = cdflib.CDF(fswi_spec2)
+    swispec = SwiSpec(cdf_spec)
+    swispec2 = SwiSpec(cdf_spec2)
+    swispec.append(swispec2)
+    fig = plt.figure(figsize=(12,6))
+    ax = fig.add_subplot(111)
+    swispec.plot(ax, cmap='jet', norm=mpl.colors.LogNorm(vmin=1e4, vmax=1e8))
