@@ -187,7 +187,8 @@ class SwiFile:
 
 def test():
 
-    ## Fix later: Currently spice has to be read before using this module.
+    ## Fix later: Currently spice has to be furnished before using this module, due to using et2datetime.
+    ## et2datetime could be revised as unix2datetime using unixtime data and dt_object = datetime.fromtimestamp(timestamp)
     import PyUVS.spice as Pyspice ##
     Pyspice.load_iuvs_spice()
 
