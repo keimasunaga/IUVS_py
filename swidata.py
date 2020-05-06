@@ -129,6 +129,62 @@ class SwimVel:
         idx = ctools.nnDt(self.timeDt, Dtrange)
         return np.std(self.data[idx[0]:idx[1],:], axis=0)
 
+
+class SwiFile:
+    def __init__(self, year, month, day, level='l2', dtype='swim', version='*', revision='*'):
+        self.year = year
+        self.month = month
+        self.day = day
+        self.level = level
+        self.dtype = dtype
+        self.dname = self._get_dname()
+        self.version = version
+        self.revision = revision
+
+    def _get_dname(self):
+        if self.dtype == 'swim':
+            return 'onboardsvymom'
+
+        elif self.dtype == 'swis':
+            return 'onboardsvyspec'
+
+        elif self.dtype == 'swica':
+            return 'coarsearc3d'
+
+        elif self.dtype == 'swics':
+            return 'coarsesvy3d'
+
+        elif self.dtype == 'swifa':
+            return 'finearc3d'
+
+        elif self.dtype == 'swifs':
+            return 'finesvy3d'
+
+    def get_file(self):
+        filepath = os.path.join(pfpdataloc, 'swi', self.level, str(self.year), '{:02d}'.format(self.month))
+        filename = 'mvn_swi_' + self.level + '_' + self.dname + '_' + str(self.year) + '{:02d}'.format(self.month) + '{:02d}'.format(self.day) + '_v??_r??.cdf'
+        fnames = glob.glob(os.path.join(filepath, filename))
+        try:
+            return self._find_newest(fnames)
+        except:
+            print('----- '+ filename + ' not found. -----')
+
+    def _find_newest(self, fnames):
+        if len(fnames) > 1:
+            ftemp = np.array([ifname.split('/')[-1] for ifname in fnames])
+            vtemp = np.array([int((iftemp.split('_')[5])[1:]) for iftemp in ftemp])
+            if len(list(set(vtemp))) == 1:
+                rtemp = np.array([int((iftemp.split('_')[6])[1:3]) for iftemp in ftemp])
+                idx = np.where(rtemp == max(rtemp))[0][0]
+                fname = fnames[idx]
+            else:
+                idx = np.where(vtemp == max(vtemp))[0][0]
+                fname = fnames[idx]
+        elif len(fnames) == 1:
+            fname = fnames[0]
+        return fname
+
+
 def test():
 
     ## Fix later: Currently spice has to be read before using this module.
