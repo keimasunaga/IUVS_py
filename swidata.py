@@ -131,7 +131,7 @@ class SwimVel:
 
 
 class SwiFile:
-    def __init__(self, year, month, day, level='l2', dtype='swim', version='*', revision='*'):
+    def __init__(self, year, month, day, level='l2', dtype='swim'):
         self.year = year
         self.month = month
         self.day = day
