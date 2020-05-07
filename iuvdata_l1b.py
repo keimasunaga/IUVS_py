@@ -244,7 +244,10 @@ def plot_apoapse_lt_geo(orbit_number, ax=None, **kwargs):
     ax.set_ylabel('Integrations')
     return mesh
 
+def test():
+    mesh = plot_apoapse_image(7050, cmap=H_colormap(), norm=mpl.colors.LogNorm(vmin=1e-1, vmax=20))
+    cb = plt.colorbar(mesh)
+    cb.set_label('Brightness [kR]')
 
-mesh = plot_apoapse_image(7050, cmap=H_colormap(), norm=mpl.colors.LogNorm(vmin=1e-1, vmax=20))
-cb = plt.colorbar(mesh)
-cb.set_label('Brightness [kR]')
+    plot_apoapse_lt_geo(7050)
+    plt.show()
