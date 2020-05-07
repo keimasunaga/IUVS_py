@@ -153,8 +153,6 @@ def plot_apoapse_image(orbit_number, wv0=121.6, wv_width=2.5, ax=None, **kwargs)
     '''
     # Get apopase information object and filenames
     apoinfo = get_apoapseinfo(orbit_number)
-    fnames = apoinfo.files
-
     for ith_file, iswath_number in enumerate(apoinfo.swath_number):
         hdul = apoinfo.get_hdul(ith_file)
         aposwath = ApoapseSwath(hdul, iswath_number, wv0, wv_width)
@@ -193,10 +191,9 @@ class SzaGeo:
 
 def plot_apoapse_sza_geo(orbit_number, ax=None, **kwargs):
     apoinfo = get_apoapseinfo(orbit_number)
-    fnames = apoinfo.files
-    for iswath, ifname in enumerate(fnames):
-        hdul = apoinfo.get_hdul(iswath)
-        szageo = SzaGeo(hdul, iswath)
+    for ith_file, iswath_number in enumerate(apoinfo.swath_number):
+        hdul = apoinfo.get_hdul(ith_file)
+        szageo = SzaGeo(hdul, iswath_number)
         mesh = szageo.plot(cmap=plt.get_cmap('magma_r', 18))
 
     ax = plt.gca()
@@ -232,10 +229,9 @@ class LocalTimeGeo:
 
 def plot_apoapse_lt_geo(orbit_number, ax=None, **kwargs):
     apoinfo = get_apoapseinfo(orbit_number)
-    fnames = apoinfo.files
-    for iswath, ifname in enumerate(fnames):
-        hdul = apoinfo.get_hdul(iswath)
-        ltgeo = LocalTimeGeo(hdul, iswath)
+    for ith_file, iswath_number in enumerate(apoinfo.swath_number):
+        hdul = apoinfo.get_hdul(ith_file)
+        ltgeo = LocalTimeGeo(hdul, iswath_number)
         mesh = ltgeo.plot(cmap=plt.get_cmap('twilight_shifted', 24))
 
     ax = plt.gca()
