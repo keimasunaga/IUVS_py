@@ -100,8 +100,6 @@ class ApoapseSwath:
 
     def plot(self, ax=None, **kwargs):
         img = self.get_img()
-        print(img.shape)
-
         x, y = self.get_xygrids()
 
         if ax is None:
