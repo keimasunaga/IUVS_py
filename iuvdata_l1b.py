@@ -167,6 +167,84 @@ def plot_apoapse_image(orbit_number, wv0=121.6, wv_width=2.5, ax=None, **kwargs)
 
     return mesh
 
+
+class SzaGeo:
+    def __init__(self, hdul, swath_number=0):
+        self.hdul = hdul
+        self.swath_number = swath_number
+        self.data = hdul['PixelGeometry'].data['PIXEL_SOLAR_ZENITH_ANGLE']
+        self.mrh_alt = hdul['PixelGeometry'].data['PIXEL_CORNER_MRH_ALT']
+
+    def get_xygrids(self):
+        x, y = angle_meshgrid(self.hdul)
+        x += slit_width_deg * self.swath_number
+        y = (120 - y) + 60
+        return x, y
+
+    def plot(self, ax=None, **kwargs):
+        img = np.where(self.mrh_alt[:,:,4] == 0, self.data, np.nan)
+        x, y = self.get_xygrids()
+        if ax is None:
+            mesh = plt.pcolormesh(x, y, img, vmin=0, vmax=180, **kwargs)
+        else:
+            mesh = ax.pcolormesh(x, y, img, vmin=0, vmax=180, **kwargs)
+
+        return mesh
+
+def plot_apoapse_sza_geo(orbit_number, ax=None, **kwargs):
+    apoinfo = get_apoapseinfo(orbit_number)
+    fnames = apoinfo.files
+    for iswath, ifname in enumerate(fnames):
+        hdul = apoinfo.get_hdul(iswath)
+        szageo = SzaGeo(hdul, iswath)
+        mesh = szageo.plot(cmap=plt.get_cmap('magma_r', 18))
+
+    ax = plt.gca()
+    ax.set_title('Orbit ' + str(orbit_number) + ' SZA')
+    ax.set_xlabel('Spatial angle [deg]')
+    ax.set_ylabel('Integrations')
+    return mesh
+
+
+class LocalTimeGeo:
+    def __init__(self, hdul, swath_number=0):
+        self.hdul = hdul
+        self.swath_number = swath_number
+        self.data = hdul['PixelGeometry'].data['PIXEL_LOCAL_TIME']
+        self.mrh_alt = hdul['PixelGeometry'].data['PIXEL_CORNER_MRH_ALT']
+
+    def get_xygrids(self):
+        x, y = angle_meshgrid(self.hdul)
+        x += slit_width_deg * self.swath_number
+        y = (120 - y) + 60
+        return x, y
+
+    def plot(self, ax=None, **kwargs):
+        # Check what the third dimension of mrh_alt!!
+        img = np.where(self.mrh_alt[:,:,4] == 0, self.data, np.nan)
+        x, y = self.get_xygrids()
+        if ax is None:
+            mesh = plt.pcolormesh(x, y, img, vmin=0, vmax=24, **kwargs)
+        else:
+            mesh = ax.pcolormesh(x, y, img, vmin=0, vmax=24, **kwargs)
+
+        return mesh
+
+def plot_apoapse_lt_geo(orbit_number, ax=None, **kwargs):
+    apoinfo = get_apoapseinfo(orbit_number)
+    fnames = apoinfo.files
+    for iswath, ifname in enumerate(fnames):
+        hdul = apoinfo.get_hdul(iswath)
+        ltgeo = LocalTimeGeo(hdul, iswath)
+        mesh = ltgeo.plot(cmap=plt.get_cmap('twilight_shifted', 24))
+
+    ax = plt.gca()
+    ax.set_title('Orbit ' + str(orbit_number) + ' Local Time')
+    ax.set_xlabel('Spatial angle [deg]')
+    ax.set_ylabel('Integrations')
+    return mesh
+
+
 mesh = plot_apoapse_image(7050, cmap=H_colormap(), norm=mpl.colors.LogNorm(vmin=1e-1, vmax=20))
 cb = plt.colorbar(mesh)
 cb.set_label('Brightness [kR]')
