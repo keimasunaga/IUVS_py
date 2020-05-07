@@ -245,9 +245,12 @@ def plot_apoapse_lt_geo(orbit_number, ax=None, **kwargs):
     return mesh
 
 def test():
-    mesh = plot_apoapse_image(7050, cmap=H_colormap(), norm=mpl.colors.LogNorm(vmin=1e-1, vmax=20))
+    fig = plt.figure()
+    ax1 = fig.add_subplot(211)
+    mesh = plot_apoapse_image(7050, ax=ax1, cmap=H_colormap(), norm=mpl.colors.LogNorm(vmin=1e-1, vmax=20))
     cb = plt.colorbar(mesh)
     cb.set_label('Brightness [kR]')
 
-    plot_apoapse_lt_geo(7050)
+    ax2 = fig.add_subplot(212)
+    plot_apoapse_lt_geo(7050, ax=ax2)
     plt.show()
