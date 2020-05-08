@@ -70,14 +70,6 @@ class ApoapseSwath:
         '''
         Retruns an apoapse swath image at a given wavelength integrated over a given wavelength range.
 
-        Parameters
-        ----------
-        wv0 : float
-            Line center wavelength in nm. (i.e., 121.6 for Ly-alpha)
-        wv_width : float
-            (Half) Width of wavelength in which counts to be intergated.
-            (i.e, counts in wv0 ± wv_width are integrated)
-
         Returns
         -------
         img : array
