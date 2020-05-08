@@ -240,6 +240,44 @@ def plot_apoapse_lt_geo(orbit_number, ax=None, **kwargs):
     ax.set_ylabel('Integrations')
     return mesh
 
+
+class LatLonGeo:
+    def __init__(self, hdul, swath_number=0):
+        self.hdul = hdul
+        self.swath_number = swath_number
+        self.lat = hdul['PixelGeometry'].data['PIXEL_CORNER_LAT']
+        self.lon = hdul['PixelGeometry'].data['PIXEL_CORNER_LON']
+        self.mrh_alt = hdul['PixelGeometry'].data['PIXEL_CORNER_MRH_ALT']
+
+    def get_xygrids(self):
+        x, y = angle_meshgrid(self.hdul)
+        x += slit_width_deg * self.swath_number
+        y = (120 - y) + 60
+        return x, y
+
+    def plot_lat(self, ax=None, **kwargs):
+        # Check what the third dimension of mrh_alt!!
+        img = np.where(self.mrh_alt[:,:,4] == 0, self.lat[:,:,4], np.nan)
+        x, y = self.get_xygrids()
+        if ax is None:
+            mesh = plt.pcolormesh(x, y, img, vmin=-90, vmax=90, **kwargs)
+        else:
+            mesh = ax.pcolormesh(x, y, img, vmin=-90, vmax=90, **kwargs)
+
+        return mesh
+
+    def plot_lon(self, ax=None, **kwargs):
+        # Check what the third dimension of mrh_alt!!
+        img = np.where(self.mrh_alt[:,:,4] == 0, self.lon[:,:,4], np.nan)
+        x, y = self.get_xygrids()
+        if ax is None:
+            mesh = plt.pcolormesh(x, y, img, vmin=0, vmax=360, **kwargs)
+        else:
+            mesh = ax.pcolormesh(x, y, img, vmin=0, vmax=360, **kwargs)
+
+        return mesh
+
+
 def test():
     fig = plt.figure()
     ax1 = fig.add_subplot(211)
