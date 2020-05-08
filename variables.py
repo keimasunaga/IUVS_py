@@ -2,7 +2,7 @@ class IuvRc:
     def __init__(self):
         self.iuvdataloc = '/Volumes/Gravity/work/data/maven_iuvs/'
         self.pfpdataloc = '/Volumes/Gravity/work/data/maven/data/sci/'
-        self.saveloc = '/Users/masunaga/work/python_git/maven/iuvs/product/'
+        self.saveloc = '/Users/masunaga/work/python_git/maven/iuvs/products/'
         self.spiceloc = '/Volumes/Gravity/work/data/maven_iuvs/spice/'
 
 # IUVS data directory
@@ -15,7 +15,7 @@ pfpdataloc = IuvRc().pfpdataloc
 spiceloc = IuvRc().spiceloc
 
 # product directory'
-productloc = IuvRc().saveloc
+saveloc = IuvRc().saveloc
 
 # PyUVS directory
 pyuvs_directory = '/Users/masunaga/work/python_git/maven/iuvs/lib/PyUVS'
