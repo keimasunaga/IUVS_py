@@ -5,7 +5,7 @@ This file has to be imported first when you use IUVS lib.
 ## Add some directories to Pythonpath
 import sys
 workpath = '/Users/masunaga/work/python_git/maven/iuvs/'
-dirs = ['test', 'script', 'lib']
+dirs = ['test', 'scripts', 'scripts/quicklook', 'lib']
 [sys.path.append(workpath + idir) for idir in dirs]
 
 ## import reload function
