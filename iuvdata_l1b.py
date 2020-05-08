@@ -59,6 +59,27 @@ class ApoapseInfo:
 
 
 class ApoapseSwath:
+    '''
+    ApoapseSwath object hanles primary data in a single apoapse swath file (i.e., hdul).
+
+    Parameters
+    ----------
+    hdul : Open fits file.
+        Header Data Units list opend by fits.open().
+    swath_number : int
+        Swath_number of the hdul data for the orbit. Defaults to 0.
+    wv0 : float
+        Line center wavelength in nm. (i.e., 121.6 for Ly-alpha)
+    wv_width : float
+        (Half) Width of wavelength in which counts to be intergated.
+        (i.e, counts in wv0 ± wv_width are integrated)
+    sqrt_data: bool
+        Option to squre root the data values. Defaults to False.
+
+    Returns
+    -------
+    ApoapseSwath Object
+    '''
     def __init__(self, hdul, swath_number=0, wv0=121.6, wv_width=2.5, sqrt_data=False):
         self.hdul = hdul
         self.swath_number = swath_number
