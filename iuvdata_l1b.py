@@ -73,8 +73,6 @@ class ApoapseSwath:
     wv_width : float
         (Half) Width of wavelength in which counts to be intergated.
         (i.e, counts in wv0 ± wv_width are integrated)
-    sqrt_data: bool
-        Option to squre root the data values. Defaults to False.
 
     Returns
     -------
