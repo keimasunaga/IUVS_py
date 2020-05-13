@@ -80,12 +80,11 @@ class ApoapseSwath:
     -------
     ApoapseSwath Object
     '''
-    def __init__(self, hdul, swath_number=0, wv0=121.6, wv_width=2.5, sqrt_data=False):
+    def __init__(self, hdul, swath_number=0, wv0=121.6, wv_width=2.5):
         self.hdul = hdul
         self.swath_number = swath_number
         self.wv0 = wv0
         self.wv_width = wv_width
-        self.sqrt_data = sqrt_data
 
     def get_img(self):
         '''
@@ -104,8 +103,6 @@ class ApoapseSwath:
         counts_sum = np.array([[np.sum(counts_1d*(np.abs(wv_1d - self.wv0) < self.wv_width)) for counts_1d, wv_1d in zip(counts_2d, wv_2d)] for counts_2d in counts_3d])
         cal_intp = np.array([np.interp(self.wv0, wv_1d, cal_1d) for wv_1d in wv_2d])
         img = counts_sum*cal_intp[None, :]
-        if self.sqrt_data:
-            img = img**0.5
         return img
 
     def get_xygrids(self):
