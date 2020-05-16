@@ -49,19 +49,19 @@ def quicklook_apoapse_diff(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
             ## Individual setttings
             ax[0][0].set_title('Orbit ' + str(orbit_number) + ' Apoapse ' + str(wv0) + ' nm')
             cb00 = plt.colorbar(mesh00, ax=ax[0][0])
-            cb00.set_label('Brightness [kR^0.5]')
+            cb00.set_label('Brightness [kR]')
 
             ax[1][0].set_title('Previous orbit Apoapse ' + str(wv0) + ' nm')
             cb10 = plt.colorbar(mesh10, ax=ax[1][0])
-            cb10.set_label('Brightness [kR^0.5]')
+            cb10.set_label('Brightness [kR]')
 
             ax[2][0].set_title('Risidual  Apoapse ' + str(wv0) + ' nm')
             cb20 = plt.colorbar(mesh20, ax=ax[2][0])
-            cb20.set_label('Brightness [kR^0.5]')
+            cb20.set_label('Brightness [kR]')
 
             ax[3][0].set_title('Risidual Apoapse ' + str(wv0) + ' nm')
             cb30 = plt.colorbar(mesh30, ax=ax[3][0])
-            cb30.set_label('Brightness [kR^0.5]')
+            cb30.set_label('Brightness [kR]')
 
             ax[0][1].set_title('Orbit ' + str(orbit_number) + ' SZA')
             cb01 = plt.colorbar(mesh01, ax=ax[0][1])
