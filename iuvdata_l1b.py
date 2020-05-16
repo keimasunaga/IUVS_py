@@ -120,6 +120,12 @@ class ApoapseSwath:
 
         return mesh
 
+    def sub_obj(self, other):
+        obj = ApoapseSwath(hdul=None, swath_number=self.swath_number, wv0=self.wv0, wv_width=self.wv_width, set_img=False)
+        img_sub = self.img - other.img
+        obj.img = img_sub
+        obj.xgrids, obj.ygrids = self.xgrids, self.ygrids
+        return obj
 
 def get_apoapseinfo(orbit_number, level='l1b', channel='fuv'):
     '''
