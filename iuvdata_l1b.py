@@ -78,13 +78,19 @@ class ApoapseSwath:
     -------
     ApoapseSwath Object
     '''
-    def __init__(self, hdul, swath_number=0, wv0=121.6, wv_width=2.5):
+    def __init__(self, hdul, swath_number=0, wv0=121.6, wv_width=2.5, set_img=True, counts=False):
         self.hdul = hdul
         self.swath_number = swath_number
         self.wv0 = wv0
         self.wv_width = wv_width
+        if set_img:
+            self.img = self.get_img(counts=counts)
+            self.xgrids, self.ygrids = self.get_xygrids()
+        else:
+            self.img = None
+            self.xgrids, self.ygrids = None, None
 
-    def get_img(self):
+    def get_img(self, counts=False):
         '''
         Retruns an apoapse swath image at a given wavelength integrated over a given wavelength range.
 
@@ -101,6 +107,10 @@ class ApoapseSwath:
         counts_sum = np.array([[np.sum(counts_1d*(np.abs(wv_1d - self.wv0) < self.wv_width)) for counts_1d, wv_1d in zip(counts_2d, wv_2d)] for counts_2d in counts_3d])
         cal_intp = np.array([np.interp(self.wv0, wv_1d, cal_1d) for wv_1d in wv_2d])
         img = counts_sum*cal_intp[None, :]
+        if counts:
+            img = counts_sum
+        else:
+            img = counts_sum*cal_intp[None, :]
         return img
 
     def get_xygrids(self):
