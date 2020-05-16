@@ -50,7 +50,7 @@ def quicklook_apoapse(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
         cb3.set_label('Latitude [deg]')
 
         plt.tight_layout()
-        savepath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/'
+        savepath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/orbits/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/'
         if not os.path.exists(savepath):
             os.makedirs(savepath)
         fname_save = 'orbit_' + '{:05d}'.format(orbit_number) + '.png'
