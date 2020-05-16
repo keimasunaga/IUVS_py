@@ -120,14 +120,10 @@ class ApoapseSwath:
         return x, y
 
     def plot(self, ax=None, **kwargs):
-        img = self.get_img()
-        x, y = self.get_xygrids()
-
         if ax is None:
-            mesh = plt.pcolormesh(x, y, img, **kwargs)
+            mesh = plt.pcolormesh(self.xgrids, self.ygrids, self.img, **kwargs)
         else:
-            mesh = ax.pcolormesh(x, y, img, **kwargs)
-
+            mesh = ax.pcolormesh(self.xgrids, self.ygrids, self.img, **kwargs)
         return mesh
 
     def sub_obj(self, other):
