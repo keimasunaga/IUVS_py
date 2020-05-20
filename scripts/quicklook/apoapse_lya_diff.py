@@ -75,7 +75,7 @@ def quicklook_apoapse_diff(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
             cb22 = plt.colorbar(mesh21, ax=ax[2][1])
             cb22.set_label('Latitude [deg]')
 
-            ax[3][1].set_title('Orbit ' + str(orbit_number) + ' Latitude')
+            ax[3][1].set_title('Orbit ' + str(orbit_number) + ' Longitude')
             cb33 = plt.colorbar(mesh31, ax=ax[3][1])
             cb33.set_label('Longitude [deg]')
 
