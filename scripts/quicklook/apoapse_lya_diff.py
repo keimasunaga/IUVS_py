@@ -12,7 +12,7 @@ def quicklook_apoapse_diff(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
     apoinfo_pre = get_apoapseinfo(orbit_number-1)
     fig, ax = plt.subplots(4, 2, figsize=(24, 16))
     if np.size(apoinfo.files) > 0 and np.size(apoinfo_pre.files) > 0:
-        if apoinfo.n_swaths == apoinfo_pre.n_swaths:
+        if apoinfo.n_swaths == apoinfo_pre.n_swaths and len(apoinfo.files) == len(apoinfo_pre.files):
             for ith_file, iswath_number in enumerate(apoinfo.swath_number):
                 ## Read data of the main orbit
                 hdul = apoinfo.get_hdul(ith_file)
