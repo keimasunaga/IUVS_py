@@ -23,7 +23,11 @@ def quicklook_apoapse_diff(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
                 aposwath_pre = ApoapseSwath(hdul_pre, iswath_number, wv0, wv_width)
 
                 ## Generate residual object
-                aposwath_sub = aposwath.sub_obj(aposwath_pre)
+                try:
+                    aposwath_sub = aposwath.sub_obj(aposwath_pre)
+                except:
+                    print('Error occured, the shape of images does not match:', aposwath.img.shape, ' and ', aposwath_pre.img.shape)
+                    continue
 
                 ## Read geometiries
                 szageo = SzaGeo(hdul, iswath_number)
