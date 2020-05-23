@@ -91,9 +91,9 @@ def quicklook_apoapse_diff(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
             if savefig:
                 plt.savefig(savepath + fname_save)
         else:
-            print('----- Number of swaths do not match. Skips this orbit. -----')
+            print('----- Number of swaths do not match. Skip orbit #' + '{:05d}'.format(orbit_number) + ' -----')
     else:
-        print('----- File(s) do not exist. Skips this orbit. -----')
+        print('----- File(s) do not exist. Skip orbit #' + '{:05d}'.format(orbit_number) + ' -----')
 
 if __name__ == '__main__':
     start_orbit = int(sys.argv[1])
