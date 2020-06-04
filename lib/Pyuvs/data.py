@@ -514,7 +514,7 @@ def sync_data(spice=True, l1b=True):
     print('Data syncing and cleanup took %.2d:%.2d:%.2d.' % (h, m, s))
 
 
-def get_files(orbit_number, directory=data_directory, level='l2b', segment='apoapse', channel='muv', count=False):
+def get_files(orbit_number, directory=data_directory, level='l1b', segment='apoapse', channel='muv', count=False):
     """
     Return file paths to FITS files for a given orbit number.
 
@@ -561,7 +561,7 @@ def get_files(orbit_number, directory=data_directory, level='l2b', segment='apoa
         return files, n_files
 
 
-def get_apoapse_files(orbit_number, directory=data_directory, level='l2b', channel='fuv'):
+def get_apoapse_files(orbit_number, directory=data_directory, level='l1b', channel='fuv'):
     """
     Convenience function for apoapse data. In addition to returning file paths to the data, it determines how many
     swaths were taken, which swath each file belongs to since there are often 2-3 files per swath, whether the MCP
@@ -651,7 +651,7 @@ def get_apoapse_files(orbit_number, directory=data_directory, level='l2b', chann
     return swath_info
 
 
-def get_file_version(orbit_number, directory=data_directory, level='l2b', segment='apoapse', channel='muv'):
+def get_file_version(orbit_number, directory=data_directory, level='l1b', segment='apoapse', channel='muv'):
     """
     Return file version and revision of FITS files for a given orbit number.
 
