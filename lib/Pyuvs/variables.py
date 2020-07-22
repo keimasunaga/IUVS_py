@@ -1,8 +1,8 @@
 # data directory
-data_directory = '/Volumes/Gravity/work/data/maven_iuvs/'
+data_directory = '/Volumes/Fenix/work/data/maven_iuvs/'
 
 # SPICE kernel directory and paths
-spice_directory = '/Volumes/Gravity/work/data/maven_iuvs/spice/'
+spice_directory = '/Volumes/Fenix/work/data/maven_iuvs/spice/'
 
 # PyUVS directory'
 pyuvs_directory = '/Users/masunaga/work/python_git/maven/iuvs/lib/PyUVS'
