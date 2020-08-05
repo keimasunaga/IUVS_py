@@ -33,6 +33,7 @@ class ApoapseInfo:
         self.channel = channel
         swath_info = get_swath_info(self.orbit_number, directory=dataloc, level=self.level, channel=channel)
         self.files = swath_info['files']
+        self.n_files = int(len(self.files))
         self.n_swaths = swath_info['n_swaths']
         self.swath_number = swath_info['swath_number']
         self.dayside = swath_info['dayside']
