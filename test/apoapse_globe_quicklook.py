@@ -62,7 +62,7 @@ def get_files(orbit_number, segment='apoapse', channel='fuv', count=False):
     orbit_block = int(orbit_number/100)*100
 
     # location of FITS files (this may change depending on the user)
-    filepath = '/Volumes/Gravity/work/data/maven_iuvs/level2b/orbit%.5d/' %(orbit_block)
+    filepath = '/Volumes/Fenix/work/data/maven_iuvs/level2b/orbit%.5d/' %(orbit_block)
 
     # format of FITS files
     if (channel == 'muv') | (channel == 'fuv'):
