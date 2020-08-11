@@ -9,3 +9,4 @@ test/__pycache__/*
 lib/PyUVS/__pycache__/*
 products/*
 pfptools/__pycache__/*
+iuvtools/__pycache__/*
