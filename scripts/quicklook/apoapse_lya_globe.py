@@ -52,7 +52,7 @@ class GlobeData:
 
             #if self.dayside(hdul):
 
-            self.flip = beta_flip(hdul)
+            #self.flip = beta_flip(hdul)
             aposwath = ApoapseSwath(hdul)
             primary_arr = aposwath.get_img()
 
