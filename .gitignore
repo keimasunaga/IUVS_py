@@ -10,3 +10,4 @@ lib/PyUVS/__pycache__/*
 products/*
 pfptools/__pycache__/*
 iuvtools/__pycache__/*
+.ipynb_checkpoints/*
