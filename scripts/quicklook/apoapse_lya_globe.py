@@ -113,37 +113,38 @@ class GlobeData:
 
 def quicklook_apoapse_globe(orbit_number):
     apoinfo = ApoapseInfo(orbit_number)
-    glb = GlobeData()
-    for ith_file, iswath_number in enumerate(apoinfo.swath_number):
-        hdul = apoinfo.get_hdul(ith_file)
-        glb.mesh_data(hdul) ## add hdul in a mesh
+    if apoinfo.n_files>0:
+        glb = GlobeData()
+        for ith_file, iswath_number in enumerate(apoinfo.swath_number):
+            hdul = apoinfo.get_hdul(ith_file)
+            glb.mesh_data(hdul) ## add hdul in a mesh
 
-    fig = plt.figure(figsize=(6, 6))
-    ax = fig.add_subplot(111)
-    mesh = glb.plot(ax=ax, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=30))
-    ax.set_xlabel('[km]')
-    ax.set_ylabel('[km]')
-    ax.set_aspect(1)
-    ax.set_title('Orbit ' + str(orbit_number))
-    # create an axes on the right side of ax. The width of cax will be 5%
-    # of ax and the padding between cax and ax will be fixed at 0.05 inch.
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.05)
-    cb = plt.colorbar(mesh, cax=cax)
-    cb.set_label('Brightness [kR]')
+        fig = plt.figure(figsize=(6, 6))
+        ax = fig.add_subplot(111)
+        mesh = glb.plot(ax=ax, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=30))
+        ax.set_xlabel('[km]')
+        ax.set_ylabel('[km]')
+        ax.set_aspect(1)
+        ax.set_title('Orbit ' + str(orbit_number))
+        # create an axes on the right side of ax. The width of cax will be 5%
+        # of ax and the padding between cax and ax will be fixed at 0.05 inch.
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cb = plt.colorbar(mesh, cax=cax)
+        cb.set_label('Brightness [kR]')
 
-    # save figure
-    pngpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/'
-    fname_save = 'orbit_' + '{:05d}'.format(orbit_number)
-    if not os.path.exists(pngpath):
-        os.makedirs(pngpath)
-    plt.savefig(pngpath + fname_save)
+        # save figure
+        pngpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/'
+        fname_save = 'orbit_' + '{:05d}'.format(orbit_number)
+        if not os.path.exists(pngpath):
+            os.makedirs(pngpath)
+        plt.savefig(pngpath + fname_save)
 
-    # save data
-    savepath = pngpath + 'npy/'
-    if not os.path.exists(savepath):
-        os.makedirs(savepath)
-    glb.save_data(savepath + fname_save)
+        # save data
+        savepath = pngpath + 'npy/'
+        if not os.path.exists(savepath):
+            os.makedirs(savepath)
+        glb.save_data(savepath + fname_save)
 
 if __name__ == '__main__':
     rt = RunTime()
