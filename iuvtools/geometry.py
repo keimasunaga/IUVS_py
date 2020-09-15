@@ -34,9 +34,9 @@ def get_sc_vel(hdul, frame='MAVEN_MSO'):
 def get_sc_sza(hdul, unit='degree'):
     pos = get_sc_pos(hdul)
     if unit == 'radian':
-        sza = np.cos(pos[:,0]/np.sqrt(pos[:,0]**2 + pos[:,1]**2 + pos[:,2]**2))
+        sza = np.arccos(pos[:,0]/np.sqrt(pos[:,0]**2 + pos[:,1]**2 + pos[:,2]**2))
     else:
-        sza = np.rad2deg(np.cos(pos[:,0]/np.sqrt(pos[:,0]**2 + pos[:,1]**2 + pos[:,2]**2)))
+        sza = np.rad2deg(np.arccos(pos[:,0]/np.sqrt(pos[:,0]**2 + pos[:,1]**2 + pos[:,2]**2)))
     return sza
 
 def get_sc_att_x(hdul, frame='MAVEN_MSO'):
