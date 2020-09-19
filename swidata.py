@@ -130,7 +130,7 @@ class SwimVel:
         return np.std(self.data[idx[0]:idx[1],:], axis=0)
 
 
-class SwiFile:
+class SwiInfo:
     def __init__(self, year, month, day, level='l2', dtype='swim'):
         self.year = year
         self.month = month
@@ -138,8 +138,8 @@ class SwiFile:
         self.level = level
         self.dtype = dtype
         self.dname = self._get_dname()
-        self.version = version
-        self.revision = revision
+        #self.version = version
+        #self.revision = revision
 
     def _get_dname(self):
         if self.dtype == 'swim':
