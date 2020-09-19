@@ -185,6 +185,50 @@ class SwiFile:
         return fname
 
 
+def get_swi_stat(sDt, eDt):
+
+    date_st = sDt.strftime('%Y%m%d')
+    date_et = eDt.strftime('%Y%m%d')
+    if date_st == date_et:
+        swiminfo = SwiInfo(sDt.year, sDt.month, sDt.day, level='l2', dtype='swim')
+        fswim = swiminfo.get_file()
+        swisinfo = SwiInfo(sDt.year, sDt.month, sDt.day, level='l2', dtype='swis')
+        fswis = swisinfo.get_file()
+        cdf_swim = cdflib.CDF(fswim)
+        cdf_swis = cdflib.CDF(fswis)
+        swispec = SwiSpec(cdf_swis)
+        swidens = SwimDens(cdf_swim)
+        swivel = SwimVel(cdf_swim)
+    else:
+        d = eDt.day - sDt.day
+        data_ok = False
+        for i in range(d+1):
+            iDt = sDt + timedelta(days=i)
+            swiminfo = SwiInfo(iDt.year, iDt.month, iDt.day, level='l2', dtype='swim')
+            swisinfo = SwiInfo(iDt.year, iDt.month, iDt.day, level='l2', dtype='swis')
+            fswim = swiminfo.get_file()
+            fswis = swisinfo.get_file()
+            cdf_swim = cdflib.CDF(fswim)
+            cdf_swis = cdflib.CDF(fswis)
+            if data_ok:
+                swispec.append(SwiSpec(cdf_swis))
+                swidens.append(SwimDens(cdf_swim))
+                swivel.append(SwimVel(cdf_swim))
+            else:
+                swispec = SwiSpec(cdf_swis)
+                swidens = SwimDens(cdf_swim)
+                swivel = SwimVel(cdf_swim)
+                data_ok = True
+
+    dens_mean = swidens.get_mean([sDt, eDt])
+    dens_std = swidens.get_std([sDt, eDt])
+    vel_mean = swivel.get_mean([sDt, eDt])
+    vel_std = swivel.get_std([sDt, eDt])
+
+    dic = {'dens_mean':dens_mean, 'dens_std':dens_std, 'vel_mean':vel_mean, 'vel_std':vel_std}
+    return dic
+
+
 def test():
 
     ## Fix later: Currently spice has to be furnished before using this module, due to using et2datetime.
