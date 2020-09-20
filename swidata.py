@@ -185,8 +185,7 @@ class SwiInfo:
         return fname
 
 
-def get_swi_stat(sDt, eDt):
-
+def get_swi_obj(sDt, eDt):
     date_st = sDt.strftime('%Y%m%d')
     date_et = eDt.strftime('%Y%m%d')
     if date_st == date_et:
@@ -220,11 +219,15 @@ def get_swi_stat(sDt, eDt):
                 swivel = SwimVel(cdf_swim)
                 data_ok = True
 
+    return swispec, swidens, swivel
+
+
+def get_swi_stat(sDt, eDt):
+    _, swidens, swivel = get_swi_obj(sDt, eDt)
     dens_mean = swidens.get_mean([sDt, eDt])
     dens_std = swidens.get_std([sDt, eDt])
     vel_mean = swivel.get_mean([sDt, eDt])
     vel_std = swivel.get_std([sDt, eDt])
-
     dic = {'dens_mean':dens_mean, 'dens_std':dens_std, 'vel_mean':vel_mean, 'vel_std':vel_std}
     return dic
 
