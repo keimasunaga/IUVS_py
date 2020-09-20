@@ -225,7 +225,7 @@ def get_swi_obj(sDt, eDt):
     return swispec, swidens, swivel
 
 
-def get_swi_stat(sDt, eDt):
+def get_swi_stats(sDt, eDt):
     _, swidens, swivel = get_swi_obj(sDt, eDt)
     dens_mean = swidens.get_mean([sDt, eDt])
     dens_std = swidens.get_std([sDt, eDt])
