@@ -176,7 +176,7 @@ from variables import pfpdataloc
 import common.tools as ctools
 from common import circular
 
-class MagFile:
+class MagInfo:
     def __init__(self, year, month, day, level='l2', dtype='1sec'):
         self.year = year
         self.month = month
@@ -205,8 +205,8 @@ def get_sav(date=None, Dt=None, dtype='1sec'):
         month = Dt.month
         day = Dt.day
 
-    magfile = MagFile(year, month, day, dtype=dtype)
-    fname = magfile.get_file()
+    maginfo = MagInfo(year, month, day, dtype=dtype)
+    fname = maginfo.get_file()
     sav = readsav(fname)
     return sav
 
@@ -332,7 +332,7 @@ class MagField:
         clock_std = circular.std(self.clock[idx[0]:idx[1]])
         return clock_std
 
-def get_magfield(sDt, n_days, frame='MAVEN_MSO', load_spice=False):
+def get_mag_obj(sDt, n_days, frame='MAVEN_MSO', load_spice=False):
     for i in range(n_days):
         Dt = sDt + timedelta(days=i)
         sav = get_sav(Dt=Dt)
@@ -345,13 +345,13 @@ def get_magfield(sDt, n_days, frame='MAVEN_MSO', load_spice=False):
 
 def get_mag_stats(sDt, eDt):
     n_days = eDt.day - sDt.day
-    magfield = get_magfield(sDt, n_days)
-    mag_mean = magfield.get_mean()
-    mag_std = magfield.get_std()
-    cone_mean = magfield.get_cone_mean()
-    cone_std = magfield.get_cone_std()
-    clock_mean = magfield.get_clock_mean()
-    clock_std = magfield.get_clock_std()
+    mag = get_mag_obj(sDt, n_days)
+    mag_mean = mag.get_mean()
+    mag_std = mag.get_std()
+    cone_mean = mag.get_cone_mean()
+    cone_std = mag.get_cone_std()
+    clock_mean = mag.get_clock_mean()
+    clock_std = mag.get_clock_std()
     dic = {'mag_mean':mag_mean, 'mag_std':mag_std,
            'cone_mean':cone_mean, 'cone_std':cone_std, 'clock_mean':clock_mean, 'clock_std':clock_std}
     return dic
