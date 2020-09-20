@@ -343,6 +343,18 @@ def get_magfield(sDt, n_days, frame='MAVEN_MSO', load_spice=False):
             mag.append(other)
     return mag
 
+def get_mag_stats(sDt, eDt):
+    n_days = eDt.day - sDt.day
+    magfield = get_magfield(sDt, n_days)
+    mag_mean = magfield.get_mean()
+    mag_std = magfield.get_std()
+    cone_mean = magfield.get_cone_mean()
+    cone_std = magfield.get_cone_std()
+    clock_mean = magfield.get_clock_mean()
+    clock_std = magfield.get_clock_std()
+    dic = {'mag_mean':mag_mean, 'mag_std':mag_std,
+           'cone_mean':cone_mean, 'cone_std':cone_std, 'clock_mean':clock_mean, 'clock_std':clock_std}
+    return dic
 
 def test():
     #sav = read_sav(date='20150126')
