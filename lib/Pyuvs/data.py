@@ -610,7 +610,8 @@ def get_apoapse_files(orbit_number, directory=data_directory, level='l1b', chann
             continue
 
         # determine if beta-flipped
-        flipped = beta_flip(hdul)
+        if flipped == 'unknown':
+            flipped = beta_flip(hdul)
 
         # store filepath
         filepaths.append(files[i])
