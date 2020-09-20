@@ -2,11 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from astropy.io import fits
+import spiceypy as spice
 
+from common.tools import quaternion_rotation
 from PyUVS.data import get_apoapse_files as get_swath_info
 from PyUVS.graphics import angle_meshgrid, H_colormap
 from PyUVS.variables import data_directory as dataloc
 from PyUVS.variables import slit_width_deg
+
 
 class ApoapseInfo:
     '''
@@ -298,6 +301,51 @@ class LatLonGeo:
             mesh = plt.pcolormesh(x, y, img, vmin=0, vmax=360, **kwargs)
         else:
             mesh = ax.pcolormesh(x, y, img, vmin=0, vmax=360, **kwargs)
+
+        return mesh
+
+class FieldAngleGeo:
+    def __init__(self, hdul, swath_number=0):
+        # Read hdul and variables
+        self.hdul = hdul
+        self.swath_number = swath_number
+        self.et = hdul['Integration'].data['et']
+        self.pixel_uvec_from_sc = hdul['PixelGeometry'].data['PIXEL_VEC'] ## pixel unit vector from sc
+        self.los_length = hdul['PixelGeometry'].data['PIXEL_CORNER_LOS']
+        self.sc_pos_iau = hdul['SpacecraftGeometry'].data['V_SPACECRAFT']
+        self.mrh_alt = hdul['PixelGeometry'].data['PIXEL_CORNER_MRH_ALT']
+        # Calc pixel vector
+        self.pixel_vec_from_sc_iau = self.pixel_uvec_from_sc * self.los_length[:, None, :, :]
+        self.pixel_vec_from_pla_iau = self.sc_pos_iau[:, :, None, None] + self.pixel_vec_from_sc_iau
+        self._to_mso(self.pixel_vec_from_pla_iau)
+
+    def _to_mso(self, pixel_vec_from_pla_iau):
+        mats = [spice.pxform('IAU_MARS', 'MAVEN_MSO', iet) for iet in self.et]
+        q = [spice.m2q(imats) for imats in mats]
+        self.pixel_vec_from_pla_mso = np.array([[quaternion_rotation(q[it], pixel_vec_from_pla_iau[it, :, ibin, 4]) for ibin in range(pixel_vec_from_pla_iau.shape[2])] for it in range(pixel_vec_from_pla_iau.shape[0])])
+        length_pixel_vec_from_pla_mso = np.sqrt(self.pixel_vec_from_pla_mso[:,:,0]**2 + self.pixel_vec_from_pla_mso[:,:,1]**2 + self.pixel_vec_from_pla_mso[:,:,2]**2)
+        self.pixel_uvec_from_pla_mso = self.pixel_vec_from_pla_mso/length_pixel_vec_from_pla_mso[:,:, None]
+
+    def calc_cone_angle(self, field_mso):
+        self.field_mso = field_mso
+        if np.size(self.field_mso) == 3:
+            self.data = np.degrees(np.arccos(np.dot(self.pixel_uvec_from_pla_mso, self.field_mso)/np.sqrt(np.dot(self.field_mso, self.field_mso))))
+        else:
+            self.data = np.array([np.degrees(np.arccos(np.dot(self.pixel_uvec_from_pla_mso[it], self.field_mso[it])/np.sqrt(np.dot(self.field_mso[it], self.field_mso[it])))) for it in range(self.pixel_uvec_from_pla_mso.shape[0])])
+
+    def get_xygrids(self):
+        x, y = angle_meshgrid(self.hdul)
+        x += slit_width_deg * self.swath_number
+        y = (120 - y) + 60
+        return x, y
+
+    def plot(self, ax=None, **kwargs):
+        img = np.where(self.mrh_alt[:,:,4] == 0, self.data, np.nan)
+        x, y = self.get_xygrids()
+        if ax is None:
+            mesh = plt.pcolormesh(x, y, img, vmin=0, vmax=180, **kwargs)
+        else:
+            mesh = ax.pcolormesh(x, y, img, vmin=0, vmax=180, **kwargs)
 
         return mesh
 
