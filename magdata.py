@@ -173,6 +173,8 @@ import matplotlib.pyplot as plt
 import spiceypy as spice
 
 from variables import pfpdataloc
+import common.tools as ctools
+from common import circular
 
 class MagFile:
     def __init__(self, year, month, day, level='l2', dtype='1sec'):
@@ -239,6 +241,9 @@ class MagField:
         self.x = np.array(b_mso[0])
         self.y = np.array(b_mso[1])
         self.z = np.array(b_mso[2])
+        self.cone = np.rad2deg(np.arccos(self.x/np.sqrt(self.x**2 + self.y**2 + self.z**2)))
+        clock_tmp = np.rad2deg(np.arccos(self.y/np.sqrt(self.y**2 + self.z**2)))
+        self.clock = np.where(self.z>=0, clock_tmp, -clock_tmp)
 
     def _to_mso(self, et, b):
         mtrx = spice.pxform(self.from_frame, self.to_frame, et)
@@ -270,6 +275,18 @@ class MagField:
         else:
             ax.plot(self.timeDt, self.t, **kwargs)
 
+    def plot_cone(self, ax=None, **kwargs):
+        if ax is None:
+            plt.plot(self.timeDt, self.cone, **kwargs)
+        else:
+            ax.plot(self.timeDt, self.cone, **kwargs)
+
+    def plot_clock(self, ax=None, **kwargs):
+        if ax is None:
+            plt.plot(self.timeDt, self.clock, **kwargs)
+        else:
+            ax.plot(self.timeDt, self.clock, **kwargs)
+
     def append(self, other):
         self.ut = np.append(self.ut, other.ut)
         self.et = np.append(self.et, other.et)
@@ -292,6 +309,28 @@ class MagField:
         std_y = np.std(self.y[idx[0]:idx[1]])
         std_z = np.std(self.z[idx[0]:idx[1]])
         return std_x, std_y, std_z
+
+    def get_cone_mean(self, Dtrange=None):
+        idx = ctools.nnDt(self.timeDt, Dtrange)
+        cone_mean = np.mean(self.cone[idx[0]:idx[1]])
+        return cone_mean
+
+    def get_cone_std(self, Dtrange=None):
+        idx = ctools.nnDt(self.timeDt, Dtrange)
+        cone_std = np.std(self.cone[idx[0]:idx[1]])
+        return cone_std
+
+    def get_clock_mean(self, Dtrange=None):
+        idx = ctools.nnDt(self.timeDt, Dtrange)
+        clock_mean = circular.mean(self.clock[idx[0]:idx[1]])
+        if clock_mean > 180:
+            clock_mean = clock_mean - 360
+        return clock_mean
+
+    def get_clock_std(self, Dtrange=None):
+        idx = ctools.nnDt(self.timeDt, Dtrange)
+        clock_std = circular.std(self.clock[idx[0]:idx[1]])
+        return clock_std
 
 def get_magfield(sDt, n_days, frame='MAVEN_MSO', load_spice=False):
     for i in range(n_days):
