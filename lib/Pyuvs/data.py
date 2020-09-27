@@ -14,6 +14,7 @@ from .miscellaneous import clear_line
 from .variables import vm_username, vm_password, data_directory, pyuvs_directory, spice_directory, slit_width_mm, \
     pixel_size_mm, focal_length_mm, muv_dispersion, slit_pix_min, slit_pix_max
 
+from iuvtools.time import get_timeDt
 
 def ignore_hidden_folder(folder_list):
     """
@@ -597,6 +598,8 @@ def get_apoapse_files(orbit_number, directory=data_directory, level='l1b', chann
     filepaths = []
     daynight = []
     swath = []
+    sDt = []
+    eDt = []
     flipped = 'unknown'
 
     # loop through files...
@@ -639,6 +642,10 @@ def get_apoapse_files(orbit_number, directory=data_directory, level='l1b', chann
         # change the previous angle comparison value
         prev_ang = hdul['integration'].data['mirror_deg'][-1]
 
+        # start and end datetime for each swath (Added by K. Masunaga)
+        timeDt = get_timeDt(hdul)
+        sDt.append(timeDt[0])
+        eDt.append(timeDt[-1])
     # make a dictionary to hold all this shit
     swath_info = {
         'files': np.array(filepaths),
@@ -646,6 +653,8 @@ def get_apoapse_files(orbit_number, directory=data_directory, level='l1b', chann
         'swath_number': np.array(swath),
         'dayside': np.array(daynight),
         'beta_flip': flipped,
+        'sDt': sDt,
+        'eDt': eDt
     }
 
     # return the dictionary

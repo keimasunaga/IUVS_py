@@ -41,6 +41,8 @@ class ApoapseInfo:
         self.swath_number = swath_info['swath_number']
         self.dayside = swath_info['dayside']
         self.beta_flip = swath_info['beta_flip']
+        self.sDt = swath_info['sDt']
+        self.eDt = swath_info['eDt']
 
     def get_hdul(self, ith_file):
         '''
