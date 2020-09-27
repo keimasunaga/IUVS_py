@@ -30,10 +30,16 @@ def get_dic_orbfiles():
     return dic
 
 def get_Dt_peri(orbit_number):
-    pass
+    df = get_df_orbfiles()
+    df_selec = df[df['orbit_number'] == orbit_number]
+    Dt_peri = pd.to_datetime(df_selec['utc_peri']).tolist()[0].to_pydatetime()
+    return Dt_peri
 
 def get_Dt_apo(orbit_number):
-    pass
+    df = get_df_orbfiles()
+    df_selec = df[df['orbit_number'] == orbit_number]
+    Dt_apo = pd.to_datetime(df_selec['utc_apo']).tolist()[0].to_pydatetime()
+    return Dt_apo
 
 def get_Dtlim(orbit_number, center='periapse'):
     if center == 'periapse':
@@ -64,5 +70,8 @@ def test():
     dic = get_dic_orbfiles()
     sDt, eDt = get_Dtlim(650, 'periapse')
     orb = get_orbit_number(eDt)
+    Dt_peri = get_Dt_peri(650)
+    Dt_apo = get_Dt_apo(650)
     print(sDt, eDt)
+    print(Dt_peri, Dt_apo)
     print(orb)
