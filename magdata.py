@@ -344,14 +344,15 @@ def get_mag_obj(sDt, n_days, frame='MAVEN_MSO', load_spice=False):
     return mag
 
 def get_mag_stats(sDt, eDt):
-    n_days = eDt.day - sDt.day
+    Dtrange = [sDt, eDt]
+    n_days = eDt.day - sDt.day + 1
     mag = get_mag_obj(sDt, n_days)
-    mag_mean = mag.get_mean()
-    mag_std = mag.get_std()
-    cone_mean = mag.get_cone_mean()
-    cone_std = mag.get_cone_std()
-    clock_mean = mag.get_clock_mean()
-    clock_std = mag.get_clock_std()
+    mag_mean = mag.get_mean(Dtrange)
+    mag_std = mag.get_std(Dtrange)
+    cone_mean = mag.get_cone_mean(Dtrange)
+    cone_std = mag.get_cone_std(Dtrange)
+    clock_mean = mag.get_clock_mean(Dtrange)
+    clock_std = mag.get_clock_std(Dtrange)
     dic = {'mag_mean':mag_mean, 'mag_std':mag_std,
            'cone_mean':cone_mean, 'cone_std':cone_std, 'clock_mean':clock_mean, 'clock_std':clock_std}
     return dic
