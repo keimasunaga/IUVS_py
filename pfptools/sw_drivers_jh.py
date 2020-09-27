@@ -7,6 +7,12 @@ from common.tools import nnDt
 from orbit_info import get_Dt_apo
 
 def get_sw_drivers_sav():
+    '''
+    Reads solar wind drivers provided by Jasper Halekas.
+    To update the data, you need to ask JH for the updated .tplot file and then run an idl procedure
+    /Users/masunaga/work/idl_git/masu-lib_maven/save_data/save_sw_drivers.pro
+    returns: sw_drivers (dict)
+    '''
     fname = '/Users/masunaga/work/save_data/maven/sav/sw_drivers_JH/drivers_merge_l2.sav'
     sav = readsav(fname)
     dic = sav['dic']
@@ -21,8 +27,12 @@ def get_sw_drivers_sav():
     sw_drivers = {'utime':utime, 'timeDt':timeDt, 'bsw':bsw, 'npsw':npsw, 'nasw':nasw, 'vpsw':vpsw, 'tp':tp, 'vvec':vvec}
     return sw_drivers
 
-
 def get_sw_driver_apo(orbit_number):
+    '''
+    Get solar wind drivers for given orbit number.
+    arg: orbit_number (int)
+    returns: sw_driver (dict)
+    '''
     Dt_apo = (get_Dt_apo(orbit_number)).replace(tzinfo=timezone.utc)
     dic_sw = get_sw_drivers_sav()
     timeDt_sw = dic_sw['timeDt']
