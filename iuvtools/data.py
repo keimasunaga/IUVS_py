@@ -33,3 +33,22 @@ def primary_is_nan(hdul):
     boolens = np.isnan(prim)
     judge = boolens.all()
     return judge
+
+def echelle_place_ok(hdul):
+    pos_ok = 'unknown'
+    if not primary_is_nan(hdul):
+        dimg = get_counts_detector_img(hdul)
+        dimg_mean = np.nanmean(dimg, axis=0)
+        wv = get_wv(hdul)
+        wv_mean = np.nanmean(wv,axis=0)
+        idx_lya = np.where((wv_mean>=120)&(wv_mean<=123))
+        lya = np.nansum(dimg_mean[idx_lya])
+        idx_128 = np.where((wv_mean>=127)&(wv_mean<=129))
+        bg_128 = np.nansum(dimg_mean[idx_128])
+        r_lya_128 = lya/bg_128
+
+        if lya > 1e3 and r_lya_128 > 10:
+            pos_ok = True
+        else:
+            pos_ok = False
+        return pos_ok
