@@ -19,7 +19,7 @@ def quicklook_detector_img(orbit_number):
         wv = get_wv(hdul)
         dimg_mean = np.nanmean(dimg, axis=0)
         wv_mean = np.nanmean(wv,axis=0)
-        print(wv_mean)
+        
         # judge if echelle place is ok
         echelle_ok = echelle_place_ok(hdul)
 
