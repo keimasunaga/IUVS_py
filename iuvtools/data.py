@@ -27,3 +27,9 @@ def get_counts_detector_img(hdul, mean=True, i_integration=None):
     else:
         img = hdul['detector_dark_subtracted'].data[i_integration]
     return img
+
+def primary_is_nan(hdul):
+    prim = get_primary(hdul)
+    boolens = np.isnan(prim)
+    judge = boolens.all()
+    return judge
