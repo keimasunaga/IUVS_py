@@ -38,8 +38,8 @@ class PixelGlobeAll:
         # Flip info
         self.flip = None
 
-    def get_apoinfo(self):
-        apoinfo = ApoapseInfo(self.orbit_number)
+    def get_apoinfo(self, channel=channle):
+        apoinfo = ApoapseInfo(self.orbit_number, channel=channel)
         return apoinfo
 
     def get_primary_dims(self, hdul):
@@ -65,7 +65,7 @@ class PixelGlobeAll:
             #if self.dayside(hdul):
 
             #self.flip = beta_flip(hdul)
-            aposwath = ApoapseSwath(hdul)
+            aposwath = ApoapseSwath(hdul, wv0=240)
             primary_arr = aposwath.get_img()
             alt_arr = hdul['PixelGeometry'].data['PIXEL_CORNER_MRH_ALT']
             sza_arr = hdul['PixelGeometry'].data['PIXEL_SOLAR_ZENITH_ANGLE']
@@ -278,14 +278,11 @@ class PixelGlobeAll:
 def quicklook_apoapse_globe_diff(orbit_number):
     glb = PixelGlobeAll(orbit_number)
     glb.set_other_orbit(orbit_number - 1)
-    apoinfo = glb.get_apoinfo()
+    apoinfo = glb.get_apoinfo(channel='muv')
     other_data_ok = os.path.isfile(glb.other_datapath)
-    print(orbit_number)
-    print(apoinfo.n_files)
-    print(apoinfo.files)
     if apoinfo.n_files > 0 and other_data_ok:
+        print('----- Processing orbit #', orbit_number, ' -----')
         et_apo = find_segment_et(orbit_number)
-        print(et_apo)
         et = []
         sc_sza = []
         Ls = []
@@ -331,13 +328,13 @@ def quicklook_apoapse_globe_diff(orbit_number):
         fig, ax = plt.subplots(4,3, figsize=(18, 18))
         mesh00 = glb.plot(ax=ax[0,0], cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=data_median))
         mesh10 = glb.plot_other(ax=ax[1,0], cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=data_median))
-        mesh20 = glb.plot_diff(ax=ax[2,0], cmap='coolwarm', vmin=-5, vmax=5)
-        mesh30 = glb.plot_diff(ax=ax[3,0], cmap=H_colormap(), vmin=0, vmax=5)
+        mesh20 = glb.plot_diff(ax=ax[2,0], cmap='coolwarm', vmin=-1000, vmax=1000)
+        mesh30 = glb.plot_diff(ax=ax[3,0], cmap=H_colormap(), vmin=0, vmax=1000)
 
         mesh01 = glb.plot(ax=ax[0,1], nanalt=400, nansza=110, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=data_median))
         mesh11 = glb.plot_other(ax=ax[1,1], nanalt=400, nansza=110, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=data_median))
-        mesh21 = glb.plot_diff(ax=ax[2,1], nanalt=400, nansza=110, cmap='coolwarm', vmin=-5, vmax=5)
-        mesh31 = glb.plot_diff(ax=ax[3,1], nanalt=400, nansza=110, cmap=H_colormap(), vmin=0, vmax=5)
+        mesh21 = glb.plot_diff(ax=ax[2,1], nanalt=400, nansza=110, cmap='coolwarm', vmin=-1000, vmax=1000)
+        mesh31 = glb.plot_diff(ax=ax[3,1], nanalt=400, nansza=110, cmap=H_colormap(), vmin=0, vmax=1000)
         mesh02 = glb.plot_sza(ax=ax[0,2], nanalt=0, cmap=plt.get_cmap('magma_r', 18))
         mesh12 = glb.plot_lt(ax=ax[1,2], nanalt=0, cmap=plt.get_cmap('twilight_shifted', 24))
         mesh22 = glb.plot_lat(ax=ax[2,2], nanalt=0, cmap=plt.get_cmap('coolwarm', 18))
@@ -383,7 +380,7 @@ def quicklook_apoapse_globe_diff(orbit_number):
         cb[3,2].set_label('Longitude [deg]')
 
         # save figure
-        pngpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_diff/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/'
+        pngpath = saveloc + 'quicklook/apoapse_l1b/muv240/globe_diff/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/'
         fname_save = 'orbit_' + '{:05d}'.format(orbit_number)
         if not os.path.exists(pngpath):
             os.makedirs(pngpath)
@@ -392,7 +389,7 @@ def quicklook_apoapse_globe_diff(orbit_number):
         # save data
         dic = {'et_apo':et_apo, 'et_lim':et_lim, 'sc_sza_apo':sc_sza_apo, 'sc_sza_lim':sc_sza_lim, 'Ls_mean':Ls_mean, 'Ls_lim':Ls_lim,
                'diff_mean':diff_mean, 'diff_med':diff_med}
-        dicpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_diff/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/npy/'
+        dicpath = saveloc + 'quicklook/apoapse_l1b/muv240/globe_diff/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/npy/'
         dname_save = 'orbit_' + '{:05d}'.format(orbit_number)
         if not os.path.exists(dicpath):
             os.makedirs(dicpath)
