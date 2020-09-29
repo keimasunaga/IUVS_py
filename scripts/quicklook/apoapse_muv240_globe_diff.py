@@ -38,7 +38,7 @@ class PixelGlobeAll:
         # Flip info
         self.flip = None
 
-    def get_apoinfo(self, channel=channle):
+    def get_apoinfo(self, channel=None):
         apoinfo = ApoapseInfo(self.orbit_number, channel=channel)
         return apoinfo
 
@@ -147,7 +147,7 @@ class PixelGlobeAll:
 
     def set_other_orbit(self, other_orbit_number):
         self.other_orbit_number = other_orbit_number
-        self.other_datapath = saveloc  + 'quicklook/apoapse_l1b/Lyman-alpha/globe/orbit_' + '{:05d}'.format(other_orbit_number//100 * 100) + '/npy/orbit_' + '{:05d}'.format(self.other_orbit_number) + '.npy'
+        self.other_datapath = saveloc  + 'quicklook/apoapse_l1b/muv240/globe/orbit_' + '{:05d}'.format(other_orbit_number//100 * 100) + '/npy/orbit_' + '{:05d}'.format(self.other_orbit_number) + '.npy'
 
     def get_other_xygrids(self):
         dic = np.load(self.other_datapath, allow_pickle=True).item()
@@ -326,13 +326,13 @@ def quicklook_apoapse_globe_diff(orbit_number):
 
         plt.close()
         fig, ax = plt.subplots(4,3, figsize=(18, 18))
-        mesh00 = glb.plot(ax=ax[0,0], cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=data_median))
-        mesh10 = glb.plot_other(ax=ax[1,0], cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=data_median))
+        mesh00 = glb.plot(ax=ax[0,0], cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=5000))
+        mesh10 = glb.plot_other(ax=ax[1,0], cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=5000))
         mesh20 = glb.plot_diff(ax=ax[2,0], cmap='coolwarm', vmin=-1000, vmax=1000)
         mesh30 = glb.plot_diff(ax=ax[3,0], cmap=H_colormap(), vmin=0, vmax=1000)
 
-        mesh01 = glb.plot(ax=ax[0,1], nanalt=400, nansza=110, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=data_median))
-        mesh11 = glb.plot_other(ax=ax[1,1], nanalt=400, nansza=110, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=data_median))
+        mesh01 = glb.plot(ax=ax[0,1], nanalt=400, nansza=110, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=5000))
+        mesh11 = glb.plot_other(ax=ax[1,1], nanalt=400, nansza=110, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=5000))
         mesh21 = glb.plot_diff(ax=ax[2,1], nanalt=400, nansza=110, cmap='coolwarm', vmin=-1000, vmax=1000)
         mesh31 = glb.plot_diff(ax=ax[3,1], nanalt=400, nansza=110, cmap=H_colormap(), vmin=0, vmax=1000)
         mesh02 = glb.plot_sza(ax=ax[0,2], nanalt=0, cmap=plt.get_cmap('magma_r', 18))
