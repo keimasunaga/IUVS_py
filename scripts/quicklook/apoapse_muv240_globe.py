@@ -54,7 +54,7 @@ class GlobeData:
             #if self.dayside(hdul):
 
             #self.flip = beta_flip(hdul)
-            aposwath = ApoapseSwath(hdul)
+            aposwath = ApoapseSwath(hdul, wv0=240)
             primary_arr = aposwath.get_img()
 
             # this is copied directly from Sonal; someday I'll figure it out and comment...
@@ -113,9 +113,9 @@ class GlobeData:
         np.save(savepath, dic)
 
 def quicklook_apoapse_globe(orbit_number):
-    apoinfo = ApoapseInfo(orbit_number)
+    apoinfo = ApoapseInfo(orbit_number, channel='muv')
     nan_ok = True
-    echelle_ok = True
+    #echelle_ok = True
     if apoinfo.n_files>0:
         glb = GlobeData()
         for ith_file, iswath_number in enumerate(apoinfo.swath_number):
@@ -123,15 +123,15 @@ def quicklook_apoapse_globe(orbit_number):
             if primary_is_nan(hdul):
                 nan_ok = False
                 continue
-            if echelle_place_ok(hdul) is False:
-                echelle_ok = False
-                continue
+            #if echelle_place_ok(hdul) is False:
+            #    echelle_ok = False
+            #    continue
             glb.mesh_data(hdul) ## add hdul in a mesh
 
-        if nan_ok and echelle_ok:
+        if nan_ok:
             fig = plt.figure(figsize=(6, 6))
             ax = fig.add_subplot(111)
-            mesh = glb.plot(ax=ax, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=30))
+            mesh = glb.plot(ax=ax, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=10000))
             ax.set_xlabel('[km]')
             ax.set_ylabel('[km]')
             ax.set_aspect(1)
@@ -144,7 +144,7 @@ def quicklook_apoapse_globe(orbit_number):
             cb.set_label('Brightness [kR]')
 
             # save figure
-            pngpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/'
+            pngpath = saveloc + 'quicklook/apoapse_l1b/muv240/globe/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/'
             fname_save = 'orbit_' + '{:05d}'.format(orbit_number)
             if not os.path.exists(pngpath):
                 os.makedirs(pngpath)
