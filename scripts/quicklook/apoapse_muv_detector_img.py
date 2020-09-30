@@ -8,7 +8,7 @@ from iuvtools.data import get_wv, get_counts_detector_img, primary_is_nan, echel
 from variables import saveloc
 
 def quicklook_detector_img(orbit_number):
-    apoinfo = get_apoapseinfo(orbit_number)
+    apoinfo = get_apoapseinfo(orbit_number, channel='muv')
     for ith_file, iswath_number in enumerate(apoinfo.swath_number):
         hdul = apoinfo.get_hdul(ith_file)
         if primary_is_nan(hdul): # skip if all data is nan
@@ -21,7 +21,7 @@ def quicklook_detector_img(orbit_number):
         wv_mean = np.nanmean(wv,axis=0)
 
         # judge if echelle place is ok
-        echelle_ok = echelle_place_ok(hdul)
+        #echelle_ok = echelle_place_ok(hdul)
 
         # plot
         plt.close()
@@ -38,12 +38,12 @@ def quicklook_detector_img(orbit_number):
         ax2.set_ylabel('counts')
         xmax2 = max(ax2.get_xlim())
         ymax2 = max(ax2.get_ylim())
-        ax2.text(xmax2*0.8, ymax2*0.9, 'echell_ok: '+str(echelle_ok))
+        #ax2.text(xmax2*0.8, ymax2*0.9, 'echell_ok: '+str(echelle_ok))
 
         # save figures
         fname = (apoinfo.files[ith_file]).split('/')[-1]
         fname2 = fname.split('.')[-3]
-        figpath = saveloc + 'quicklook/apoapse_l1b/detector_img/orbit_' + '{:05}'.format(apoinfo.orbit_number//100*100)+'/orbit_' + '{:05}'.format(apoinfo.orbit_number) + '/'
+        figpath = saveloc + 'quicklook/apoapse_l1b/detector_img_muv/orbit_' + '{:05}'.format(apoinfo.orbit_number//100*100)+'/orbit_' + '{:05}'.format(apoinfo.orbit_number) + '/'
         if not os.path.exists(figpath):
             os.makedirs(figpath, exist_ok=True)
         plt.savefig(figpath + fname2 + '.png')
