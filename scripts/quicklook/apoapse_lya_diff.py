@@ -35,8 +35,8 @@ def quicklook_apoapse_diff(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
                 latlongeo = LatLonGeo(hdul, iswath_number)
 
                 # Plot images
-                mesh00 = aposwath.plot(ax[0][0], cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=30))
-                mesh10 = aposwath_pre.plot(ax[1][0], cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=30))
+                mesh00 = aposwath.plot(ax[0][0], cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=50))
+                mesh10 = aposwath_pre.plot(ax[1][0], cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=50))
                 mesh20 = aposwath_sub.plot(ax[2][0], cmap='coolwarm', vmin=-10, vmax=10)
                 mesh30 = aposwath_sub.plot(ax[3][0], cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=10))
 
