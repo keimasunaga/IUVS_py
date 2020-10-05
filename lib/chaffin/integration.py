@@ -27,24 +27,24 @@ for k in fuv_lsf_seven_segment.keys():
 
 # from sonal, derived from Lyman alpha (so technicallly only valid there)
 seven_segment_flatfield = [0.976, 1.018, 1.018,  1.022, 1.004, 0.99, 0.953]
-    
+
 def get_lsf_from_bins(spatial_binning):
-    #get the lsf for each spatial bin. 
+    #get the lsf for each spatial bin.
     #spatial_binning is a list of the start pixels of the spatial bins
     #last value in the list should be end of last spatial bin+1
-    
+
     cruise_lsf=np.load(os.path.join(anc_dir, 'cruise_lsf_23Sep2020.npy'))
     spapix=np.arange(76,916,4)#these are the start pixels of the LSF spatial bins
                               #end pixels are spapix[1:]-1
-    
+
     lsf=np.zeros((len(spatial_binning)-1,cruise_lsf.shape[1]))
     for idx in range(len(spatial_binning)-1):
-        this_lsf=np.sum(cruise_lsf[  (spatial_binning[idx]<spapix+4) 
+        this_lsf=np.sum(cruise_lsf[  (spatial_binning[idx]<spapix+4)
                                    & (spapix<spatial_binning[idx+1])],
                         axis=0)
         this_lsf = this_lsf/np.sum(this_lsf)
         lsf[idx,:]=this_lsf
-    
+
     return lsf
 
 def get_lsf(myfits):
@@ -87,17 +87,17 @@ def get_lya(myfits):
     save_file_subdir='orbit'+str(((int(save_file_orbit)//100)*100)).zfill(5)
     save_file_subdir=os.path.join(lya_fit_vals_dir,save_file_subdir)
     save_file_name=os.path.join(save_file_subdir,save_file_name)
-    
+
     if not os.path.exists(save_file_subdir):
         os.makedirs(save_file_subdir)
-        
+
     if os.path.exists(save_file_name):
         return np.load(save_file_name)
     else:
         lyavals=fit_line(myfits,121.56)
         np.save(save_file_name,lyavals)
         return lyavals
-    
+
 
 def fit_line(myfits, l0, calibrate=True, flatfield_correct=True, plot=False, correct_muv=False):
     import astropy.io.fits as fits
@@ -131,8 +131,8 @@ def fit_line(myfits, l0, calibrate=True, flatfield_correct=True, plot=False, cor
             flatfield = np.array([np.mean(slit_flatfield[p0:p1]) for p0,p1 in zip(myfits_spatial_binning[:-1],
                                                                                   myfits_spatial_binning[1:])])
 
-        
-    filedims = myfits['Primary'].shape  
+
+    filedims = myfits['Primary'].shape
     n_int = filedims[0]
     n_spa = filedims[1]
 
@@ -143,7 +143,7 @@ def fit_line(myfits, l0, calibrate=True, flatfield_correct=True, plot=False, cor
 
     if plot:
         from .graphics import line_fit_plot
-        myplot=line_fit_plot(myfits,n_int,n_spa,correct_muv) 
+        myplot=line_fit_plot(myfits,n_int,n_spa,correct_muv)
     #now get the data (and maybe put it on the plot)
     for iint in range(n_int):
         if plot:
@@ -186,7 +186,7 @@ def fit_line(myfits, l0, calibrate=True, flatfield_correct=True, plot=False, cor
                 thislinevalue = np.nan
 
             DN_fit = thislinevalue
-                
+
             # return the requested values
             if flatfield_correct:
                 thislinevalue /= flatfield[ispa]
@@ -196,7 +196,7 @@ def fit_line(myfits, l0, calibrate=True, flatfield_correct=True, plot=False, cor
                 thislinevalue *= cal_factor
 
             linevalues[iint, ispa] = thislinevalue
-                
+
             if plot:
                   myplot.plot_line_fits(iint, ispa,
                                         fitwaves,
@@ -282,8 +282,7 @@ def get_line_calibration(myfits,
     muv_dispersion = 0.16535  # nm/pix, dispersion of the MUV channel
 
     # load IUVS sensitivity curve
-    effective_area = readsav(
-        '/home/mike/Documents/MAVEN/IUVS/iuvs-itf-sw/anc/cal_data/sensitivity update 6_9_14.sav')
+    effective_area = readsav(anc_dir+'sensitivity update 6_9_14.sav')
 
     # get channel specific parms
     adjust_cal_factor = 1.0
