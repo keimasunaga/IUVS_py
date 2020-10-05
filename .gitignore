@@ -7,6 +7,8 @@ scripts/quicklook/__pycache__/*
 flgpkg/__pycache__/*
 test/__pycache__/*
 lib/PyUVS/__pycache__/*
+lib/chaffin/__pycache__/*
+lib/chaffin/quicklooks/__pycache__/*
 products/*
 pfptools/__pycache__/*
 iuvtools/__pycache__/*
