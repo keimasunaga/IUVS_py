@@ -20,6 +20,9 @@ saveloc = IuvRc().saveloc
 # PyUVS directory
 pyuvs_directory = '/Users/masunaga/work/python_git/maven/iuvs/lib/PyUVS'
 
+# chaffin directory
+chaffin_directory = '/Users/masunaga/work/python_git/maven/iuvs/lib/chaffin'
+
 # VM access info
 vm_username = 'username'
 vm_password = 'password'
