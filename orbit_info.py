@@ -1,7 +1,7 @@
 import numpy as np
 from glob import glob
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timezone
 
 def get_df_orbfiles():
     datapath = '/Volumes/Fenix/work/data/misc/spice/naif/MAVEN/kernels/spk/'
@@ -32,13 +32,13 @@ def get_dic_orbfiles():
 def get_Dt_peri(orbit_number):
     df = get_df_orbfiles()
     df_selec = df[df['orbit_number'] == orbit_number]
-    Dt_peri = pd.to_datetime(df_selec['utc_peri']).tolist()[0].to_pydatetime()
+    Dt_peri = pd.to_datetime(df_selec['utc_peri']).tolist()[0].to_pydatetime().replace(tzinfo=timezone.utc)
     return Dt_peri
 
 def get_Dt_apo(orbit_number):
     df = get_df_orbfiles()
     df_selec = df[df['orbit_number'] == orbit_number]
-    Dt_apo = pd.to_datetime(df_selec['utc_apo']).tolist()[0].to_pydatetime()
+    Dt_apo = pd.to_datetime(df_selec['utc_apo']).tolist()[0].to_pydatetime().replace(tzinfo=timezone.utc)
     return Dt_apo
 
 def get_Dtlim(orbit_number, center='periapse'):
@@ -46,21 +46,21 @@ def get_Dtlim(orbit_number, center='periapse'):
         df = get_df_orbfiles()
         df_selec = df[df['orbit_number'] == orbit_number]
         df_selec_pre = df[df['orbit_number'] == orbit_number - 1]
-        eDt = pd.to_datetime(df_selec['utc_apo']).tolist()[0].to_pydatetime()
-        sDt = pd.to_datetime(df_selec_pre['utc_apo']).tolist()[0].to_pydatetime()
+        eDt = pd.to_datetime(df_selec['utc_apo']).tolist()[0].to_pydatetime().replace(tzinfo=timezone.utc)
+        sDt = pd.to_datetime(df_selec_pre['utc_apo']).tolist()[0].to_pydatetime().replace(tzinfo=timezone.utc)
     elif center == 'apoapse':
         df = get_df_orbfiles()
         df_selec = df[df['orbit_number'] == orbit_number]
         df_selec_lat = df[df['orbit_number'] == orbit_number + 1]
-        sDt = pd.to_datetime(df_selec['utc_peri']).tolist()[0].to_pydatetime()
-        eDt = pd.to_datetime(df_selec_lat['utc_peri']).tolist()[0].to_pydatetime()
+        sDt = pd.to_datetime(df_selec['utc_peri']).tolist()[0].to_pydatetime().replace(tzinfo=timezone.utc)
+        eDt = pd.to_datetime(df_selec_lat['utc_peri']).tolist()[0].to_pydatetime().replace(tzinfo=timezone.utc)
     return [sDt, eDt]
 
 def get_orbit_number(Dt):
     dic = get_dic_orbfiles()
     orbit_number_all = np.array(dic['orbit_number'])
-    Dt_peri = np.array([datetime.strptime(istr, '%Y %b %d %H:%M:%S') for istr in dic['utc_peri']])
-    Dt_apo = np.array([datetime.strptime(istr, '%Y %b %d %H:%M:%S') for istr in dic['utc_apo']])
+    Dt_peri = np.array([datetime.strptime(istr, '%Y %b %d %H:%M:%S') for istr in dic['utc_peri']]) #add tzinfo here too?
+    Dt_apo = np.array([datetime.strptime(istr, '%Y %b %d %H:%M:%S') for istr in dic['utc_apo']]) #add tzinfo here too?
     idx_orb = np.where((Dt >= Dt_peri[0:-1]) & (Dt < Dt_peri[1:]))[0][0]
     orbit_number = orbit_number_all[idx_orb]
     return orbit_number
