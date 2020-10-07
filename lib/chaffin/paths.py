@@ -5,7 +5,7 @@ l1b_files_directory = "/media/mike/Data/IUVS_data/"
 spice_dir = '/home/mike/Documents/MAVEN/IUVS/iuvs-itf-sw/anc/spice/'
 
 #directory where the IDL colorbars RGB files are located ('' is acceptable and will substitute magma)
-idl_cmap_directory = '/home/mike/Documents/Utilities/IDL_packages/chaffin/IDL-Colorbars/IDL_rgb_values/'
+idl_cmap_directory = ''#'/home/mike/Documents/Utilities/IDL_packages/chaffin/IDL-Colorbars/IDL_rgb_values/'
 
 #directory where LM integrated reports live
 irdir='/home/mike/Documents/MAVEN/IUVS/integrated_reports/integrated_reports/'
@@ -19,4 +19,4 @@ mcs_dir='/home/mike/Documents/Mars/MCS_Data/'
 lya_fit_vals_dir='/home/mike/Documents/MAVEN/IUVS/iuvs_python/lya_fit_values/'
 
 #paths defined automatically
-anc_dir=os.path.join(os.path.dirname(__file__),'anc')
+anc_dir='/Users/masunaga/work/python_git/maven/iuvs/lib/chaffin/anc/'#os.path.join(os.path.dirname(__file__),'anc')
