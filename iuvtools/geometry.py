@@ -132,3 +132,11 @@ def get_pix_phase_agl(hdul):
 def get_pix_lt(hdul):
     lt = hdul['PixelGeometry'].data['Pixel_Local_Time']
     return lt
+
+def get_pix_vec(hdul):
+    pixel_uvec_from_sc = hdul['PixelGeometry'].data['PIXEL_VEC'] ## pixel unit vector from sc in IAU MARS frame
+    return pixel_uvec_from_sc
+
+def get_los_length(hdul):
+    los_length = hdul['PixelGeometry'].data['PIXEL_CORNER_LOS']
+    return los_length
