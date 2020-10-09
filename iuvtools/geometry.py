@@ -166,7 +166,7 @@ class PixelTransCoord:
         # Calc pixel vector from sc and planet
         self.pixel_vec_from_sc_iau = self.pixel_uvec_from_sc * self.los_length[:, None, :, :]
         self.pixel_vec_from_pla_iau = self.sc_pos_iau[:, :, None, None] + self.pixel_vec_from_sc_iau
-        self.calc_pixel_vec_dest()
+        #self.calc_pixel_vec_dest()
 
     def get_trans_mat_to_sc_frame(self, frame_tbc):
         '''
