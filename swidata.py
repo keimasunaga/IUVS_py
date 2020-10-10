@@ -17,12 +17,8 @@ class SwiSpec:
     def __init__(self, cdf):
         self.et = cdf.varget('time_met')
         self.timeDt = np.array([et2datetime(iet) for iet in self.et])
-        self._remove_tzinfo()
         self.data = cdf.varget('spectra_diff_en_fluxes')
         self.v = cdf.varget('energy_spectra')
-
-    def _remove_tzinfo(self):
-        self.timeDt = np.array([iDt.replace(tzinfo=None) for iDt in self.timeDt])
 
     def get_energy_time_grids(self):
         mt = np.array([mdates.date2num(iDt) for iDt in self.timeDt])
@@ -56,11 +52,7 @@ class SwimDens:
     def __init__(self, cdf):
         self.et = cdf.varget('time_met')
         self.timeDt = np.array([et2datetime(iet) for iet in self.et])
-        self._remove_tzinfo()
         self.data = cdf.varget('density')
-
-    def _remove_tzinfo(self):
-        self.timeDt = np.array([iDt.replace(tzinfo=None) for iDt in self.timeDt])
 
     def plot(self, ax=None, xylabels=True, **kwargs):
         if ax is None:
@@ -88,12 +80,8 @@ class SwimVel:
     def __init__(self, cdf):
         self.et = cdf.varget('time_met')
         self.timeDt = np.array([et2datetime(iet) for iet in self.et])
-        self._remove_tzinfo()
         self.data = cdf.varget('velocity_mso')
         self.data_t = np.linalg.norm(self.data, axis=1)
-
-    def _remove_tzinfo(self):
-        self.timeDt = np.array([iDt.replace(tzinfo=None) for iDt in self.timeDt])
 
     def plot_x(self, ax=None, **kwargs):
         if ax is None:
