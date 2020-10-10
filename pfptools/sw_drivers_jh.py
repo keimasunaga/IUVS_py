@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.io import readsav
 from datetime import datetime, timezone
 
-from common.tools import nnDt
+from common.tools import nnDt, unix2Dt
 from orbit_info import get_Dt_apo
 
 def get_sw_drivers_sav():
@@ -17,7 +17,7 @@ def get_sw_drivers_sav():
     sav = readsav(fname)
     dic = sav['dic']
     utime = dic.item()[0][0][0]
-    timeDt = np.array([datetime.fromtimestamp(iut, tz=timezone.utc) for iut in utime])
+    timeDt = np.array(unix2Dt(utime))
     bsw = dic.item()[0][0][2]
     npsw = dic.item()[1][0][2]
     nasw = dic.item()[2][0][2]
@@ -33,9 +33,10 @@ def get_sw_driver_apo(orbit_number):
     arg: orbit_number (int)
     returns: sw_driver (dict)
     '''
-    Dt_apo = (get_Dt_apo(orbit_number)).replace(tzinfo=timezone.utc)
+    Dt_apo = get_Dt_apo(orbit_number)
     dic_sw = get_sw_drivers_sav()
     timeDt_sw = dic_sw['timeDt']
+    print(timeDt_sw[0].tzinfo, Dt_apo.tzinfo)
     idxDt = nnDt(timeDt_sw, Dt_apo)
     sw_driver = {ikey:dic_sw[ikey].T[idxDt] for ikey in dic_sw.keys()}
     return sw_driver
