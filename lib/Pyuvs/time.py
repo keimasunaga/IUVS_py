@@ -65,7 +65,7 @@ def et2datetime(et):
     isoformat = '%Y-%m-%dT%H:%M:%S.%f'
 
     # return the datetime object version of the input ephemeris time
-    return datetime.strptime(result, isoformat).replace(tzinfo=pytz.utc)
+    return datetime.strptime(result, isoformat)#.replace(tzinfo=pytz.utc)
 
 
 def find_segment_et(orbit_number, segment='apoapse'):
