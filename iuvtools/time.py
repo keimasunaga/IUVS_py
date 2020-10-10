@@ -1,5 +1,5 @@
 import numpy as np
-from datetime import datetime, timezone
+from datetime import datetime
 
 '''
 Time handling tools
@@ -13,7 +13,7 @@ def get_utc(hdul):
     return utc
 
 def utc2Dt(utc):
-    Dt = datetime.strptime(utc, '%Y/%j %b %d %H:%M:%S.%fUTC').replace(tzinfo=timezone.utc)
+    Dt = datetime.strptime(utc, '%Y/%j %b %d %H:%M:%S.%fUTC')
     return Dt
 
 def get_timeDt(hdul):

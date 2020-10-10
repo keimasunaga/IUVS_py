@@ -219,8 +219,7 @@ class MagField:
             load_kernels(sc_data_folder, mvn_software_folder)
         data = sav['data']
         self.ut = data['time']
-        self.timeDt = np.array([datetime.utcfromtimestamp(iut) for iut in self.ut])
-        self.timeDt2 = np.array([datetime.fromtimestamp(iut) for iut in self.ut])
+        self.timeDt = ctools.unix2Dt(self.ut)#np.array([datetime.utcfromtimestamp(iut) for iut in self.ut])
         self.et = spice.str2et([i.strftime('%b %d, %Y %H:%M:%S') for i in self.timeDt])
         self.x = data['ob_bpl_x']
         self.y = data['ob_bpl_y']
