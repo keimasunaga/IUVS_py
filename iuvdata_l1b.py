@@ -320,6 +320,7 @@ class FieldAngleGeo:
         self.pixel_vec_from_sc_iau = self.pixel_uvec_from_sc * self.los_length[:, None, :, :]
         self.pixel_vec_from_pla_iau = self.sc_pos_iau[:, :, None, None] + self.pixel_vec_from_sc_iau
         self._to_mso(self.pixel_vec_from_pla_iau)
+        self.data = None
 
     def _to_mso(self, pixel_vec_from_pla_iau):
         mats = [spice.pxform('IAU_MARS', 'MAVEN_MSO', iet) for iet in self.et]
@@ -329,11 +330,14 @@ class FieldAngleGeo:
         self.pixel_uvec_from_pla_mso = self.pixel_vec_from_pla_mso/length_pixel_vec_from_pla_mso[:,:, None]
 
     def calc_cone_angle(self, field_mso):
-        self.field_mso = field_mso
-        if np.size(self.field_mso) == 3:
-            self.data = np.degrees(np.arccos(np.dot(self.pixel_uvec_from_pla_mso, self.field_mso)/np.sqrt(np.dot(self.field_mso, self.field_mso))))
+        if field_mso is not None:
+            self.field_mso = field_mso
+            if np.size(self.field_mso) == 3:
+                self.data = np.degrees(np.arccos(np.dot(self.pixel_uvec_from_pla_mso, self.field_mso)/np.sqrt(np.dot(self.field_mso, self.field_mso))))
+            else:
+                self.data = np.array([np.degrees(np.arccos(np.dot(self.pixel_uvec_from_pla_mso[it], self.field_mso[it])/np.sqrt(np.dot(self.field_mso[it], self.field_mso[it])))) for it in range(self.pixel_uvec_from_pla_mso.shape[0])])
         else:
-            self.data = np.array([np.degrees(np.arccos(np.dot(self.pixel_uvec_from_pla_mso[it], self.field_mso[it])/np.sqrt(np.dot(self.field_mso[it], self.field_mso[it])))) for it in range(self.pixel_uvec_from_pla_mso.shape[0])])
+            self.field_mso = None
 
     def get_xygrids(self):
         x, y = angle_meshgrid(self.hdul)
