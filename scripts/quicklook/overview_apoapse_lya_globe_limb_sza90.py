@@ -67,13 +67,15 @@ def plot_overview(alt_default=True, selec_region=[0,1,2,3,4,5]):
         else:
             alt_default = True
 
+    orbit_arr = np.arange(700, 7320)
+
     color = [[0.22719513, 0.24914381, 0.40675258, 1. ],
              [0.53262074, 0.35198344, 0.50904462, 1. ],
              [0.90686879, 0.62111989, 0.57090984, 1. ],
              [0.91383359, 0.82674759, 0.55570039, 1. ],
              [0.55800763, 0.76309657, 0.59473906, 1. ],
              [0.23115755, 0.46685701, 0.50050539, 1. ]]
-    orbit_arr = np.arange(700, 5500)
+
     for ith, iregion in enumerate(selec_region):
         data = []
         sza = []
@@ -85,11 +87,12 @@ def plot_overview(alt_default=True, selec_region=[0,1,2,3,4,5]):
         euv_lya = []
         Ls = []
         timeDt = []
-
+        orbits = []
         for iorbit in orbit_arr:
             dic = get_globe_data_region(iorbit, region=iregion, alt_default=alt_default, median_br=False)
             if dic is None:
                 continue
+            orbits.append(iorbit)
             data.append(dic['data'])
             sza.append(dic['sza'])
             angle.append(dic['angle_efield'])
