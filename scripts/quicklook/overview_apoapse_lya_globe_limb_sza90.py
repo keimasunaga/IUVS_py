@@ -288,9 +288,14 @@ def plot_overview(alt_default=True, selec_region=[0,1,2,3,4,5]):
 
 
 def plot_overview_altdiff():
-    orbit_arr = np.arange(700, 5500)
-    selec_region=[0,1,5]
-    color = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5']
+    orbit_arr = np.arange(700, 7320)
+    selec_region=[2,3,4]
+    color = [[0.22719513, 0.24914381, 0.40675258, 1. ],
+             [0.53262074, 0.35198344, 0.50904462, 1. ],
+             [0.90686879, 0.62111989, 0.57090984, 1. ],
+             [0.91383359, 0.82674759, 0.55570039, 1. ],
+             [0.55800763, 0.76309657, 0.59473906, 1. ],
+             [0.23115755, 0.46685701, 0.50050539, 1. ]]
 
     for ith, iregion in enumerate(selec_region):
         data = []
@@ -511,7 +516,7 @@ def plot_overview_altdiff():
 
 def plot_overview_altdiff_map():
     orbit_arr = np.arange(700, 5500)
-    selec_region=[2,3,4]
+    selec_region=[0,1,2,3,4,5]
     color = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5']
 
     for ith, iregion in enumerate(selec_region):
