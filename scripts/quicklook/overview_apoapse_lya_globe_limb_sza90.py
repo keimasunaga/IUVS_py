@@ -77,7 +77,7 @@ def plot_overview(alt_default=True, selec_region=[5,0,1,2,3,4]):
              [0.23115755, 0.46685701, 0.50050539, 1. ]]
 
 
-    fig= plt.figure(figsize=(20, 20))
+    fig= plt.figure(figsize=(20, 25))
     widths = [3, 1]
     gs = fig.add_gridspec(9,2, width_ratios=widths)#fig.add_gridspec(5, 2, height_ratios=heights)
     plt.subplots_adjust(hspace = 0.3)
@@ -91,6 +91,7 @@ def plot_overview(alt_default=True, selec_region=[5,0,1,2,3,4]):
     ax60 = fig.add_subplot(gs[6,0])
     ax70 = fig.add_subplot(gs[7,0])
     ax80 = fig.add_subplot(gs[8,0])
+    ax90 = fig.add_subplot(gs[9,0])
 
     #ax00 = fig.add_subplot(gs[0,0])
     ax11 = fig.add_subplot(gs[1,1])
@@ -101,6 +102,7 @@ def plot_overview(alt_default=True, selec_region=[5,0,1,2,3,4]):
     ax61 = fig.add_subplot(gs[6,1])
     ax71 = fig.add_subplot(gs[7,1])
     ax81 = fig.add_subplot(gs[8,1])
+    ax91 = fig.add_subplot(gs[8,0])
     br_lim = [0, 15]
 
     for ith, iregion in enumerate(selec_region):
@@ -111,6 +113,7 @@ def plot_overview(alt_default=True, selec_region=[5,0,1,2,3,4]):
         lon = []
         lt = []
         fsw = []
+        bsw = []
         euv_lya = []
         Ls = []
         timeDt = []
@@ -132,8 +135,10 @@ def plot_overview(alt_default=True, selec_region=[5,0,1,2,3,4]):
                 vsw = dic_sw['vpsw']
                 nsw = dic_sw['npsw']
                 fsw.append(nsw * vsw * 1e5)
+                bsw.append(dic['bsw'][3])
             else:
                 fsw.append(np.nan)
+                bsw.append(np.nan)
 
             if dic_euv is not None:
                 euv_lya.append(dic_euv['euv'][2])
@@ -153,6 +158,7 @@ def plot_overview(alt_default=True, selec_region=[5,0,1,2,3,4]):
         lon = np.array(lon)
         lt = np.array(lt)
         fsw = np.array(fsw)
+        bsw = np.array(bsw)
         euv_lya = np.array(euv_lya)
         Ls = np.array(Ls)
         timeDt = np.array(timeDt)
@@ -324,9 +330,9 @@ def plot_overview_altdiff():
              [0.55800763, 0.76309657, 0.59473906, 1. ],
              [0.23115755, 0.46685701, 0.50050539, 1. ]]
 
-    fig= plt.figure(figsize=(20, 20))
+    fig= plt.figure(figsize=(20, 25))
     widths = [3, 1]
-    gs = fig.add_gridspec(9,2, width_ratios=widths)#fig.add_gridspec(5, 2, height_ratios=heights)
+    gs = fig.add_gridspec(10,2, width_ratios=widths)#fig.add_gridspec(5, 2, height_ratios=heights)
     plt.subplots_adjust(hspace = 0.3)
 
     ax00 = fig.add_subplot(gs[0,0])
@@ -338,6 +344,7 @@ def plot_overview_altdiff():
     ax60 = fig.add_subplot(gs[6,0])
     ax70 = fig.add_subplot(gs[7,0])
     ax80 = fig.add_subplot(gs[8,0])
+    ax90 = fig.add_subplot(gs[9,0])
 
     #ax00 = fig.add_subplot(gs[0,0])
     ax11 = fig.add_subplot(gs[1,1])
@@ -348,6 +355,7 @@ def plot_overview_altdiff():
     ax61 = fig.add_subplot(gs[6,1])
     ax71 = fig.add_subplot(gs[7,1])
     ax81 = fig.add_subplot(gs[8,1])
+    ax91 = fig.add_subplot(gs[9,1])
 
     for ith, iregion in enumerate(selec_region):
         data = []
@@ -357,6 +365,7 @@ def plot_overview_altdiff():
         lon = []
         lt = []
         fsw = []
+        bsw = []
         euv_lya = []
         Ls = []
         timeDt = []
@@ -394,8 +403,11 @@ def plot_overview_altdiff():
                 vsw = dic_sw['vpsw']
                 nsw = dic_sw['npsw']
                 fsw.append(nsw * vsw * 1e5)
+                bsw.append(dic_sw['bsw'][3])
+
             else:
                 fsw.append(np.nan)
+                bsw.append(np.nan)
 
             if dic_euv is not None:
                 euv_lya.append(dic_euv['euv'][2])
@@ -416,6 +428,7 @@ def plot_overview_altdiff():
         lon = np.array(lon)
         lt = np.array(lt)
         fsw = np.array(fsw)
+        bsw = np.array(bsw)
         euv_lya = np.array(euv_lya)
         Ls = np.array(Ls)
         timeDt = np.array(timeDt)
@@ -445,47 +458,52 @@ def plot_overview_altdiff():
         ax20.set_ylabel('Fsw [/cm2/s]')
         ax20.set_yscale('log')
 
-        #ax30 = fig.add_subplot(gs[3,0])
-        ax30.plot(timeDt[angle>0], angle[angle>0], 'o', markersize=1, color=color[iregion])
+        #ax20 = fig.add_subplot(gs[2,0])
+        ax30.plot(timeDt, bsw, 'o', markersize=1, color=color[iregion])
         ax30.set_xlabel('time')
-        ax30.set_ylabel('Angle wrt E-field [deg]')
-        ax30.set_ylim(0, 180)
-        ax30.set_yticks(np.arange(0, 181, 30))
+        ax30.set_ylabel('Bsw [nT]')
+
+        #ax30 = fig.add_subplot(gs[3,0])
+        ax40.plot(timeDt[angle>0], angle[angle>0], 'o', markersize=1, color=color[iregion])
+        ax40.set_xlabel('time')
+        ax40.set_ylabel('Angle wrt E-field [deg]')
+        ax40.set_ylim(0, 180)
+        ax40.set_yticks(np.arange(0, 181, 30))
 
         #ax40 = fig.add_subplot(gs[4,0])
-        ax40.plot(timeDt, Ls, 'o', markersize=1, color=color[iregion])
-        ax40.set_xlabel('time')
-        ax40.set_ylabel('Ls [deg]')
-        ax40.set_ylim(-10, 370)
-        ax40.set_yticks(np.arange(0, 361, 60))
+        ax50.plot(timeDt, Ls, 'o', markersize=1, color=color[iregion])
+        ax50.set_xlabel('time')
+        ax50.set_ylabel('Ls [deg]')
+        ax50.set_ylim(-10, 370)
+        ax50.set_yticks(np.arange(0, 361, 60))
 
         #ax50 = fig.add_subplot(gs[5,0])
-        ax50.plot(timeDt, sza, 'o', markersize=1, color=color[iregion])
-        ax50.set_xlabel('time')
-        ax50.set_ylabel('SZA [deg]')
-        ax50.set_ylim(0, 180)
-        ax50.set_yticks(np.arange(0, 181, 30))
+        ax60.plot(timeDt, sza, 'o', markersize=1, color=color[iregion])
+        ax60.set_xlabel('time')
+        ax60.set_ylabel('SZA [deg]')
+        ax60.set_ylim(0, 180)
+        ax60.set_yticks(np.arange(0, 181, 30))
 
         #ax60 = fig.add_subplot(gs[6,0])
-        ax60.plot(timeDt, lt, 'o', markersize=1, color=color[iregion])
-        ax60.set_xlabel('time')
-        ax60.set_ylabel('LT [deg]')
-        ax60.set_ylim(0, 24)
-        ax60.set_yticks(np.arange(0, 25, 4))
+        ax70.plot(timeDt, lt, 'o', markersize=1, color=color[iregion])
+        ax70.set_xlabel('time')
+        ax70.set_ylabel('LT [deg]')
+        ax70.set_ylim(0, 24)
+        ax70.set_yticks(np.arange(0, 25, 4))
 
         #ax70 = fig.add_subplot(gs[7,0])
-        ax70.plot(timeDt, lon, 'o', markersize=1, color=color[iregion])
-        ax70.set_xlabel('time')
-        ax70.set_ylabel('Lon [deg]')
-        ax70.set_ylim(-10, 370)
-        ax70.set_yticks(np.arange(0, 361, 60))
+        ax80.plot(timeDt, lon, 'o', markersize=1, color=color[iregion])
+        ax80.set_xlabel('time')
+        ax80.set_ylabel('Lon [deg]')
+        ax80.set_ylim(-10, 370)
+        ax80.set_yticks(np.arange(0, 361, 60))
 
         #ax80 = fig.add_subplot(gs[8,0])
-        ax80.plot(timeDt, lat, 'o', markersize=1, color=color[iregion])
-        ax80.set_xlabel('time')
-        ax80.set_ylabel('Lat [deg]')
-        ax80.set_ylim(-90, 90)
-        ax80.set_yticks(np.arange(-90, 91, 30))
+        ax90.plot(timeDt, lat, 'o', markersize=1, color=color[iregion])
+        ax90.set_xlabel('time')
+        ax90.set_ylabel('Lat [deg]')
+        ax90.set_ylim(-90, 90)
+        ax90.set_yticks(np.arange(-90, 91, 30))
 
         #ax11 = fig.add_subplot(gs[1,1])
         ax11.plot(euv_lya, data, 'o', markersize=1, color=color[iregion])
@@ -502,57 +520,61 @@ def plot_overview_altdiff():
         #ax21.set_ylim(-7.5, 7.5)
         #ax21.set_yticks(np.arange(-7.5, 7.6, 2.5))
 
-        #ax31 = fig.add_subplot(gs[3,1])
-        ax31.plot(angle[angle>0], data[angle>0], 'o', markersize=1, color=color[iregion])
-        ax31.set_xlabel('Angle wrt E-field [deg]')
+        ax31.plot(bsw, data, 'o', markersize=1, color=color[iregion])
+        ax31.set_xlabel('Bsw [nT]')
         ax31.set_ylabel('Brightness [kR]')
-        ax31.set_xlim(0, 180)
-        ax31.set_xticks(np.arange(0, 181, 30))
+
+        #ax31 = fig.add_subplot(gs[3,1])
+        ax41.plot(angle[angle>0], data[angle>0], 'o', markersize=1, color=color[iregion])
+        ax41.set_xlabel('Angle wrt E-field [deg]')
+        ax41.set_ylabel('Brightness [kR]')
+        ax41.set_xlim(0, 180)
+        ax41.set_xticks(np.arange(0, 181, 30))
         #ax31.set_ylim(-7.5, 7.5)
         #ax31.set_yticks(np.arange(-7.5, 7.6, 2.5))
 
         #ax41 = fig.add_subplot(gs[4,1])
-        ax41.plot(Ls, data, 'o', markersize=1, color=color[iregion])
-        ax41.set_xlabel('Ls [deg]')
-        ax41.set_ylabel('Brightness [kR]')
-        ax41.set_xlim(-10, 370)
-        ax41.set_xticks(np.arange(0, 361, 60))
+        ax51.plot(Ls, data, 'o', markersize=1, color=color[iregion])
+        ax51.set_xlabel('Ls [deg]')
+        ax51.set_ylabel('Brightness [kR]')
+        ax51.set_xlim(-10, 370)
+        ax51.set_xticks(np.arange(0, 361, 60))
         #ax41.set_ylim(-7.5, 7.5)
         #ax41.set_yticks(np.arange(-7.5, 7.6, 2.5))
 
         #ax51 = fig.add_subplot(gs[5,1])
-        ax51.plot(sza, data, 'o', markersize=1, color=color[iregion])
-        ax51.set_xlabel('SZA [deg]')
-        ax51.set_ylabel('Brightness [kR]')
-        ax51.set_xlim(0, 180)
-        ax51.set_xticks(np.arange(0, 181, 30))
+        ax61.plot(sza, data, 'o', markersize=1, color=color[iregion])
+        ax61.set_xlabel('SZA [deg]')
+        ax61.set_ylabel('Brightness [kR]')
+        ax61.set_xlim(0, 180)
+        ax61.set_xticks(np.arange(0, 181, 30))
         #ax51.set_ylim(-7.5, 7.5)
         #ax51.set_yticks(np.arange(-7.5, 7.6, 2.5))
 
         #ax61 = fig.add_subplot(gs[6,1])
-        ax61.plot(lt, data, 'o', markersize=1, color=color[iregion])
-        ax61.set_xlabel('LT [hour]')
-        ax61.set_ylabel('Brightness [kR]')
-        ax61.set_xlim(-0.5, 24.5)
-        ax61.set_xticks(np.arange(0, 25, 4))
+        ax71.plot(lt, data, 'o', markersize=1, color=color[iregion])
+        ax71.set_xlabel('LT [hour]')
+        ax71.set_ylabel('Brightness [kR]')
+        ax71.set_xlim(-0.5, 24.5)
+        ax71.set_xticks(np.arange(0, 25, 4))
         #ax61.set_ylim(-7.5, 7.5)
         #ax61.set_yticks(np.arange(-7.5, 7.6, 2.5))
 
         #ax71 = fig.add_subplot(gs[7,1])
-        ax71.plot(lon, data, 'o', markersize=1, color=color[iregion])
-        ax71.set_xlabel('Lon [deg]')
-        ax71.set_ylabel('Brightness [kR]')
-        ax71.set_xlim(-10, 370)
-        ax71.set_xticks(np.arange(0, 361, 60))
+        ax81.plot(lon, data, 'o', markersize=1, color=color[iregion])
+        ax81.set_xlabel('Lon [deg]')
+        ax81.set_ylabel('Brightness [kR]')
+        ax81.set_xlim(-10, 370)
+        ax81.set_xticks(np.arange(0, 361, 60))
         #ax71.set_ylim(-7.5, 7.5)
         #ax71.set_yticks(np.arange(-7.5, 7.6, 2.5))
 
         #ax81 = fig.add_subplot(gs[8,1])
-        ax81.plot(lat, data, 'o', markersize=1, color=color[iregion])
-        ax81.set_xlabel('Lat [deg]')
-        ax81.set_ylabel('Brightness [kR]')
-        ax81.set_xlim(-90, 90)
-        ax81.set_xticks(np.arange(-90, 91, 30))
+        ax91.plot(lat, data, 'o', markersize=1, color=color[iregion])
+        ax91.set_xlabel('Lat [deg]')
+        ax91.set_ylabel('Brightness [kR]')
+        ax91.set_xlim(-90, 90)
+        ax91.set_xticks(np.arange(-90, 91, 30))
         #ax81.set_ylim(-7.5, 7.5)
         #ax81.set_yticks(np.arange(-7.5, 7.6, 2.5))
 
