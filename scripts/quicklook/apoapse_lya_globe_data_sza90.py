@@ -92,7 +92,7 @@ class PixelGlobeAll:
 
             #self.flip = beta_flip(hdul)
             aposwath = ApoapseSwath(hdul)
-            primary_arr = aposwath.get_img()
+            primary_arr = aposwath.fit_line()
             alt_arr = hdul['PixelGeometry'].data['PIXEL_CORNER_MRH_ALT']
             sza_arr = hdul['PixelGeometry'].data['PIXEL_SOLAR_ZENITH_ANGLE']
             lt_arr = hdul['PixelGeometry'].data['PIXEL_LOCAL_TIME']
@@ -641,7 +641,7 @@ if __name__ == '__main__':
     #load_iuvs_spice()
     from iuvtools.info import get_orbit_sza_apo_90
     orbit_arr = get_orbit_sza_apo_90()
-    orbit_arr = orbit_arr[orbit_arr>5431]
+    orbit_arr = orbit_arr[orbit_arr>9661]
     for iorbit_number in orbit_arr:
         print('{:05d}'.format(iorbit_number))
         save_globe_data(iorbit_number)
