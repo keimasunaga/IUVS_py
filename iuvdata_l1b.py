@@ -9,6 +9,7 @@ from PyUVS.data import get_apoapse_files as get_swath_info
 from PyUVS.graphics import angle_meshgrid, H_colormap
 from PyUVS.variables import data_directory as dataloc
 from PyUVS.variables import slit_width_deg
+from chaffin.integration import fit_line
 
 
 class ApoapseInfo:
@@ -118,6 +119,9 @@ class ApoapseSwath:
         else:
             img = counts_sum*cal_intp[None, :]
         return img
+
+    def fit_line(self):
+        return fit_line(self.hdul, self.wv0)
 
     def get_xygrids(self):
         x, y = angle_meshgrid(self.hdul)
