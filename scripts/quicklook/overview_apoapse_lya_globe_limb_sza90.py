@@ -6,6 +6,7 @@ import os, sys
 
 from PyUVS.graphics import H_colormap
 from variables import saveloc
+from pa_list_ah import PAListPeri
 
 
 def get_globe_data_region(orbit_number, region=0, alt_default=True, median_br=True):
@@ -329,6 +330,7 @@ def plot_overview_altdiff():
              [0.91383359, 0.82674759, 0.55570039, 1. ],
              [0.55800763, 0.76309657, 0.59473906, 1. ],
              [0.23115755, 0.46685701, 0.50050539, 1. ]]
+    palist = PAListPeri()
 
     fig= plt.figure(figsize=(20, 25))
     widths = [3, 1]
@@ -379,6 +381,8 @@ def plot_overview_altdiff():
 
 
         for iorbit in orbit_arr:
+            if palist.neighbor_detected(iorbit) != [True, True]:
+                continue
             dic = get_globe_data_region(iorbit, region=iregion, alt_default=True, median_br=False)
             dic2 = get_globe_data_region(iorbit, region=iregion, alt_default=False, median_br=False)
 
