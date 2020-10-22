@@ -59,7 +59,7 @@ def get_iuv_sw_euv_data(orbit_number):
     return dic_iuvs, dic_sw, dic_euv
 
 
-def plot_overview(alt_default=True, selec_region=[5,0,1,2,3,4]):
+def plot_overview(sorbit=700, eorbit=10000, alt_default=True, selec_region=[5,0,1,2,3,4]):
     args = [i for i in sys.argv]
     if len(args)>1:
         alt_default = args[1]
@@ -68,7 +68,7 @@ def plot_overview(alt_default=True, selec_region=[5,0,1,2,3,4]):
         else:
             alt_default = True
 
-    orbit_arr = np.arange(700, 7320)
+    orbit_arr = np.arange(sorbit, eorbit)
 
     color = [[0.22719513, 0.24914381, 0.40675258, 1. ],
              [0.53262074, 0.35198344, 0.50904462, 1. ],
@@ -163,7 +163,7 @@ def plot_overview(alt_default=True, selec_region=[5,0,1,2,3,4]):
         euv_lya = np.array(euv_lya)
         Ls = np.array(Ls)
         timeDt = np.array(timeDt)
-        
+
         """idx = np.where(np.array(Ls)>180)[0]
         data = data[idx]
         angle = angle[idx]
@@ -378,6 +378,7 @@ def plot_overview_altdiff(sorbit=700, eorbit=10000, selec_region=[5,0,1,2,3,4], 
         euv_lya = []
         Ls = []
         timeDt = []
+        orbits = []
 
         data2 = []
         sza2 = []
@@ -396,6 +397,7 @@ def plot_overview_altdiff(sorbit=700, eorbit=10000, selec_region=[5,0,1,2,3,4], 
 
             if dic is None or dic2 is None:
                 continue
+            orbits.append(iorbit)
             data.append(dic['data'])
             sza.append(dic['sza'])
             angle.append(dic['angle_efield'])
@@ -591,8 +593,6 @@ def plot_overview_altdiff(sorbit=700, eorbit=10000, selec_region=[5,0,1,2,3,4], 
 
     ax00.legend(loc=(1.04,0), markerscale=5)
     plt.tight_layout()
-    #plt.show()
-
 
     os.makedirs(saveloc+'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza90/overview/', exist_ok=True)
     plt.savefig(saveloc+'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza90/overview/overview_globe_sza90_altdiff.png', dpi=300)
