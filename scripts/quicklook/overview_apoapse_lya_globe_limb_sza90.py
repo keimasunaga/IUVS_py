@@ -703,3 +703,313 @@ def plot_overview_altdiff_map():
 
     os.makedirs(saveloc+'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza90/overview/', exist_ok=True)
     plt.savefig(saveloc+'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza90/overview/overview_map_globe_sza90_altdiff.png', dpi=300)
+
+
+
+
+
+def plot_overview_orbdiff(sorbit=700, eorbit=10000,  selec_region=[5,0,1,2,3,4], use_palist=False):
+
+    orbit_arr = np.arange(sorbit, eorbit) #orbit 5431 has an issue with spice??
+
+    color = [[0.22719513, 0.24914381, 0.40675258, 1. ],
+             [0.53262074, 0.35198344, 0.50904462, 1. ],
+             [0.90686879, 0.62111989, 0.57090984, 1. ],
+             [0.91383359, 0.82674759, 0.55570039, 1. ],
+             [0.55800763, 0.76309657, 0.59473906, 1. ],
+             [0.23115755, 0.46685701, 0.50050539, 1. ]]
+    palist = PAListPeri()
+    fig= plt.figure(figsize=(20, 25))
+    widths = [3, 1]
+    gs = fig.add_gridspec(9,2, width_ratios=widths)#fig.add_gridspec(5, 2, height_ratios=heights)
+    plt.subplots_adjust(hspace = 0.3)
+
+    ax00 = fig.add_subplot(gs[0,0])
+    ax10 = fig.add_subplot(gs[1,0])
+    ax20 = fig.add_subplot(gs[2,0])
+    ax30 = fig.add_subplot(gs[3,0])
+    ax40 = fig.add_subplot(gs[4,0])
+    ax50 = fig.add_subplot(gs[5,0])
+    ax60 = fig.add_subplot(gs[6,0])
+    ax70 = fig.add_subplot(gs[7,0])
+    ax80 = fig.add_subplot(gs[8,0])
+
+    ax11 = fig.add_subplot(gs[1,1])
+    ax21 = fig.add_subplot(gs[2,1])
+    ax31 = fig.add_subplot(gs[3,1])
+    ax41 = fig.add_subplot(gs[4,1])
+    ax51 = fig.add_subplot(gs[5,1])
+    ax61 = fig.add_subplot(gs[6,1])
+    ax71 = fig.add_subplot(gs[7,1])
+    ax81 = fig.add_subplot(gs[8,1])
+
+    for ith, iregion in enumerate(selec_region):
+        data = []
+        sza = []
+        angle = []
+        lat = []
+        lon = []
+        lt = []
+        Ls = []
+        timeDt = []
+
+        data2 = []
+        sza2 = []
+        angle2 = []
+        lat2 = []
+        lon2 = []
+        lt2 = []
+
+        vsw = []
+        vsw2 = []
+        nsw = []
+        nsw2 = []
+        bsw = []
+        bsw2 = []
+
+        euv_lya = []
+        euv_lya2 = []
+        euv_a = [] #17-22 nm
+        euv_a2 = []
+        euv_b = [] #0.1-7 nm
+        euv_b2 = []
+
+        for iorbit in orbit_arr:
+            if use_palist:
+                if palist.neighbor_detected(iorbit) != [True, True]:
+                    continue
+            dic = get_globe_data_region(iorbit, region=iregion, alt_default=True, median_br=False)
+            dic2 = get_globe_data_region(iorbit-1, region=iregion, alt_default=True, median_br=False)
+
+            if dic is None or dic2 is None:
+                continue
+            data.append(dic['data'])
+            sza.append(dic['sza'])
+            angle.append(dic['angle_efield'])
+            lat.append(dic['lat'])
+            lon.append(dic['lon'])
+            lt.append(dic['lt'])
+
+            data2.append(dic2['data'])
+            sza2.append(dic2['sza'])
+            angle2.append(dic2['angle_efield'])
+            lat2.append(dic2['lat'])
+            lon2.append(dic2['lon'])
+            lt2.append(dic2['lt'])
+
+            dic_iuvs, dic_sw, dic_euv = get_iuv_sw_euv_data(iorbit)
+            dic_iuvs2, dic_sw2, dic_euv2 = get_iuv_sw_euv_data(iorbit-1)
+            if dic_sw is not None:
+                vsw.append(dic_sw['vpsw'])
+                nsw.append(dic_sw['npsw'])
+                bsw.append(dic_sw['bsw'][3])
+            else:
+                vsw.append(np.nan)
+                nsw.append(np.nan)
+                bsw.append(np.nan)
+
+            if dic_sw2 is not None:
+                vsw2.append(dic_sw2['vpsw'])
+                nsw2.append(dic_sw2['npsw'])
+                bsw2.append(dic_sw2['bsw'][3])
+            else:
+                vsw2.append(np.nan)
+                nsw2.append(np.nan)
+                bsw2.append(np.nan)
+
+            if dic_euv is not None:
+                euv_lya.append(dic_euv['euv'][2])
+                euv_a.append(dic_euv['euv'][0])
+                euv_b.append(dic_euv['euv'][1])
+            else:
+                euv_lya.append(np.nan)
+                euv_a.append(np.nan)
+                euv_b.append(np.nan)
+
+            if dic_euv2 is not None:
+                euv_lya2.append(dic_euv2['euv'][2])
+                euv_a2.append(dic_euv2['euv'][0])
+                euv_b2.append(dic_euv2['euv'][1])
+            else:
+                euv_lya2.append(np.nan)
+                euv_a2.append(np.nan)
+                euv_b2.append(np.nan)
+
+            if dic_iuvs is not None:
+                Ls.append(dic_iuvs['Ls_mean'])
+                timeDt.append(dic_iuvs['Dt_apo'])
+            else:
+                Ls.append(np.nan)
+                timeDt.append(np.nan)
+
+        ddata = np.array(data) - np.array(data2)
+        sza = np.array(sza)
+        if angle != 0 and angle2 !=0:
+            angle = np.abs(np.array(angle) - np.array(angle2))
+        else:
+            angle = np.nan
+        lat = np.array(lat)
+        lon = np.array(lon)
+        lt = np.array(lt)
+        nsw = np.array(nsw)# - np.array(nsw2)
+        vsw = np.array(vsw)# - np.array(vsw2)
+        fsw = nsw * vsw * 1e5
+        pdy = nsw *  vsw**2 * 1.6726 * 1e-6
+        nsw2 = np.array(nsw2)
+        vsw2 = np.array(vsw2)
+        fsw2 = nsw2 * vsw2 * 1e5
+        pdy2 = nsw2 *  vsw2**2 * 1.6726 * 1e-6
+        dnsw = nsw - nsw2
+        dvsw = vsw - vsw2
+        dfsw = fsw - fsw2
+        dpdy = pdy - pdy2
+
+        bsw = np.array(bsw)
+        bsw2 = np.array(bsw2)
+        dbsw = bsw - bsw2
+
+        euv_lya = np.array(euv_lya)
+        euv_lya2 = np.array(euv_lya2)
+        deuv_lya = euv_lya - euv_lya2
+
+        euv_a = np.array(euv_a)
+        euv_a2 = np.array(euv_a2)
+        deuv_a = euv_a - euv_a2
+
+        euv_b = np.array(euv_b)
+        euv_b2 = np.array(euv_b2)
+        deuv_b = euv_b - euv_b2
+
+        Ls = np.array(Ls)
+        timeDt = np.array(timeDt)
+
+        ax00.plot(timeDt, ddata, 'o', markersize=1, label='region '+str(iregion), color=color[iregion])
+        ax00.set_xlabel('time')
+        ax00.set_ylabel('Brightness [kR]')
+        #ax00.set_ylim(-7.5, 7.5)
+        #ax00.set_yticks(np.arange(-7.5, 7.6, 2.5))
+
+        ax10.plot(timeDt, deuv_lya, 'o', markersize=1, color=color[iregion])
+        ax10.set_xlabel('time')
+        ax10.set_ylabel('Ly-alpha irradiance [W/m2]')
+
+        ax20.plot(timeDt, deuv_a, 'o', markersize=1, color=color[iregion])
+        ax20.set_xlabel('time')
+        ax20.set_ylabel('Ly-alpha irradiance [W/m2]')
+
+        ax30.plot(timeDt, deuv_b, 'o', markersize=1, color=color[iregion])
+        ax30.set_xlabel('time')
+        ax30.set_ylabel('Ly-alpha irradiance [W/m2]')
+
+        ax40.plot(timeDt, dnsw, 'o', markersize=1, color=color[iregion])
+        ax40.set_xlabel('time')
+        ax40.set_ylabel('nsw [/cm3]')
+        #ax20.set_yscale('log')
+
+        ax50.plot(timeDt, dvsw, 'o', markersize=1, color=color[iregion])
+        ax50.set_xlabel('time')
+        ax50.set_ylabel('vsw [/km/s]')
+        #ax30.set_yscale('log')
+
+        ax60.plot(timeDt, dfsw, 'o', markersize=1, color=color[iregion])
+        ax60.set_xlabel('time')
+        ax60.set_ylabel('Fsw [/cm2/s]')
+        #ax40.set_yscale('log')
+
+        ax70.plot(timeDt, dpdy, 'o', markersize=1, color=color[iregion])
+        ax70.set_xlabel('time')
+        ax70.set_ylabel('Pdy [nPa]')
+        #ax50.set_yscale('log')
+
+        ax80.plot(timeDt, dbsw, 'o', markersize=1, color=color[iregion])
+        ax80.set_xlabel('time')
+        ax80.set_ylabel('Bsw [nT]')
+        #ax60.set_yscale('log')
+
+
+        ax11.axvline(x=0, color='grey', linestyle=':', alpha=0.5)
+        ax11.axhline(y=0, color='grey', linestyle=':', alpha=0.5)
+        ax11.plot(deuv_lya, ddata, 'o', markersize=1, color=color[iregion])
+        ax11.set_xlabel('Delta Ly-alpha irradiance [W/m2]')
+        ax11.set_ylabel('Brightness [kR]')
+        ax11.set_ylim(-3, 3)
+        #ax11.set_yticks(np.arange(-2.5, 2.6, 0.5))
+
+        ax21.axvline(x=0, color='grey', linestyle=':', alpha=0.5)
+        ax21.axhline(y=0, color='grey', linestyle=':', alpha=0.5)
+        ax21.plot(deuv_a, ddata, 'o', markersize=1, color=color[iregion])
+        ax21.set_xlabel('Delta Channel A (17-22 nm) irradiance [W/m2]')
+        ax21.set_ylabel('Brightness [kR]')
+        ax21.set_ylim(-3, 3)
+        #ax21.set_yticks(np.arange(-2.5, 2.6, 0.5))
+
+        ax31.axvline(x=0, color='grey', linestyle=':', alpha=0.5)
+        ax31.axhline(y=0, color='grey', linestyle=':', alpha=0.5)
+        ax31.plot(deuv_a, ddata, 'o', markersize=1, color=color[iregion])
+        ax31.set_xlabel('Delta Channel B (0.1-7 nm) irradiance [W/m2]')
+        ax31.set_ylabel('Brightness [kR]')
+        ax31.set_ylim(-3, 3)
+        #ax31.set_yticks(np.arange(-2.5, 2.6, 0.5))
+
+
+        ax41.axvline(x=0, color='grey', linestyle=':', alpha=0.5)
+        ax41.axhline(y=0, color='grey', linestyle=':', alpha=0.5)
+        ax41.plot(dnsw, ddata, 'o', markersize=1, color=color[iregion])
+        ax41.set_xlabel('Delta nsw [/cm3]')
+        ax41.set_ylabel('Brightness [kR]')
+        ax41.set_xlim(-20, 20)
+        ax41.set_ylim(-3, 3)
+
+        ax51.axvline(x=0, color='grey', linestyle=':', alpha=0.5)
+        ax51.axhline(y=0, color='grey', linestyle=':', alpha=0.5)
+        ax51.plot(dvsw, ddata, 'o', markersize=1, color=color[iregion])
+        ax51.set_xlabel('Delta vsw [km/s]')
+        ax51.set_ylabel('Brightness [kR]')
+        ax51.set_xlim(-125, 125)
+        ax51.set_ylim(-3, 3)
+
+        ax61.axvline(x=0, color='grey', linestyle=':', alpha=0.5)
+        ax61.axhline(y=0, color='grey', linestyle=':', alpha=0.5)
+        ax61.plot(dfsw, ddata, 'o', markersize=1, color=color[iregion])
+        ax61.set_xlabel('Delta Fsw [/cm2/s]')
+        ax61.set_ylabel('Brightness [kR]')
+        ax61.set_xlim(-5e8, 5e8)
+        ax61.set_ylim(-3, 3)
+
+        ax71.axvline(x=0, color='grey', linestyle=':', alpha=0.5)
+        ax71.axhline(y=0, color='grey', linestyle=':', alpha=0.5)
+        ax71.plot(dpdy, ddata, 'o', markersize=1, color=color[iregion])
+        ax71.set_xlabel('Delta Pdy [nPa]')
+        ax71.set_ylabel('Brightness [kR]')
+        ax71.set_xlim(-3.5, 3.5)
+        ax71.set_ylim(-3, 3)
+
+        ax81.axvline(x=0, color='grey', linestyle=':', alpha=0.5)
+        ax81.axhline(y=0, color='grey', linestyle=':', alpha=0.5)
+        ax81.plot(dbsw, ddata, 'o', markersize=1, color=color[iregion])
+        ax81.set_xlabel('Delta Bsw [nT]')
+        ax81.set_ylabel('Brightness [kR]')
+        ax81.set_xlim(-10, 10)
+        ax81.set_ylim(-3, 3)
+
+
+    ax00.legend(loc=(1.04,0), markerscale=5)
+    plt.tight_layout()
+    #plt.show()
+
+    from scipy.stats import spearmanr
+    corr_lya, _ = spearmanr(deuv_lya, ddata, nan_policy='omit')
+    corr_fsw, _ = spearmanr(dfsw, ddata, nan_policy='omit')
+    corr_pdy, _ = spearmanr(dpdy, ddata, nan_policy='omit')
+    corr_nsw, _ = spearmanr(dnsw, ddata, nan_policy='omit')
+    corr_vsw, _ = spearmanr(dvsw, ddata, nan_policy='omit')
+    corr_bsw, _ = spearmanr(dbsw, ddata, nan_policy='omit')
+
+    print('corr_nsw', corr_nsw,
+          'corr_fsw', corr_fsw,
+          'corr_pdy', corr_pdy,
+          'corr_vsw', corr_vsw,
+          'corr_bsw', corr_bsw,
+          'corr_lya', corr_lya)
+    os.makedirs(saveloc+'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza90/overview/', exist_ok=True)
+    plt.savefig(saveloc+'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza90/overview/overview_globe_sza90_orbdiff.png', dpi=300)
