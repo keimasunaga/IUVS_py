@@ -626,9 +626,9 @@ def plot_overview_altdiff(sorbit=700, eorbit=10000, selec_region=[5,0,1,2,3,4], 
 
 
 
-def plot_overview_altdiff_map():
-    orbit_arr = np.arange(700, 5500)
-    selec_region=[0,1,2,3,4,5]
+def plot_overview_altdiff_map(sorbit=700, eorbit=10000, selec_region=[5,0,1,2,3,4]):
+    orbit_arr = np.arange(sorbit, eorbit)
+
     color = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5']
 
     for ith, iregion in enumerate(selec_region):
