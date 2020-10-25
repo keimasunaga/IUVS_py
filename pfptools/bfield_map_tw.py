@@ -22,10 +22,14 @@ def plot_bfield_map(comp='br', altbin=0):
     ax = fig.add_subplot(111)
     mesh = ax.pcolormesh(lon_shifted, lat_shifted, bmap, cmap='coolwarm', vmin=-100, vmax=100)
     cb = plt.colorbar(mesh, ax=ax)
-    cb.set_label(comp + '[nT]')
+    cb.set_label(comp + ' [nT]')
     ax.set_title('Alt = ' + str(alt) + ' km')
     ax.set_xlabel('East longitude')
     ax.set_ylabel('Latitude')
+    path = saveloc + 'misc_items/bfield_map/'
+    os.makedirs(path, exist_ok=True)
+    fname = comp + '_with_labels.jpg'
+    plt.savefig(path + fname)
 
 def plot_bfield_map_no_labels(comp='br', altbin=0):
     alt = 150 * (altbin+1)
@@ -46,4 +50,4 @@ def plot_bfield_map_no_labels(comp='br', altbin=0):
 
 def test_plot():
     plot_bfield_map_no_labels('br',0)
-test_plot()
+#test_plot()
