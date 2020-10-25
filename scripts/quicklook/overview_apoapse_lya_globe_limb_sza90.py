@@ -626,10 +626,14 @@ def plot_overview_altdiff(sorbit=700, eorbit=10000, selec_region=[5,0,1,2,3,4], 
 
 
 
-def plot_overview_altdiff_map(sorbit=700, eorbit=10000, selec_region=[5,0,1,2,3,4]):
+def plot_overview_altdiff_map(sorbit=700, eorbit=10000, selec_region=[2,3,4], use_palist=False):
     orbit_arr = np.arange(sorbit, eorbit)
-
-    color = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5']
+    plt.close('all')
+    palist = PAListPeri()
+    fig = plt.figure(figsize=(10, 10))
+    gs = fig.add_gridspec(2,1)
+    ax = fig.add_subplot(gs[0,0])
+    ax2 = fig.add_subplot(gs[1,0])
 
     for ith, iregion in enumerate(selec_region):
         data = []
@@ -652,6 +656,9 @@ def plot_overview_altdiff_map(sorbit=700, eorbit=10000, selec_region=[5,0,1,2,3,
 
 
         for iorbit in orbit_arr:
+            if use_palist:
+                if palist.neighbor_detected(iorbit) != [True, True]:
+                    continue
             dic = get_globe_data_region(iorbit, region=iregion, alt_default=True, median_br=False)
             dic2 = get_globe_data_region(iorbit, region=iregion, alt_default=False, median_br=False)
 
@@ -703,20 +710,20 @@ def plot_overview_altdiff_map(sorbit=700, eorbit=10000, selec_region=[5,0,1,2,3,
         timeDt = np.array(timeDt)
 
 
-        if ith==0:
-            fig = plt.figure(figsize=(10, 10))
-            gs = fig.add_gridspec(2,1)#fig.add_gridspec(5, 2, height_ratios=heights)
+        #if ith==0:
+        #    fig = plt.figure(figsize=(10, 10))
+        #    gs = fig.add_gridspec(2,1)#fig.add_gridspec(5, 2, height_ratios=heights)
             #plt.subplots_adjust(hspace = 0.3)
 
-        ax = fig.add_subplot(gs[0,0])
-        ax.scatter(lon, lat, c=data, cmap=plt.get_cmap('coolwarm'), vmin=-5, vmax=5)
+
+        sc = ax.scatter(lon, lat, c=data, cmap=plt.get_cmap('viridis'), vmin=0.3, vmax=1)
         ax.set_xlim(0, 360)
         ax.set_ylim(-90, 90)
         ax.set_xlabel('lon [deg]')
         ax.set_ylabel('lat [deg]')
 
-        ax2 = fig.add_subplot(gs[1,0])
-        ax2.scatter(euv_lya, fsw, c=data, cmap=plt.get_cmap('coolwarm'), vmin=-5, vmax=5)
+
+        sc2 = ax2.scatter(euv_lya, fsw, c=data, cmap=plt.get_cmap('inferno'), vmin=0.5, vmax=3)
         ax2.set_xlim(2e-3, 4e-3)
         ax2.set_ylim(1e7, 1e10)
         ax2.set_yscale('log')
@@ -724,6 +731,10 @@ def plot_overview_altdiff_map(sorbit=700, eorbit=10000, selec_region=[5,0,1,2,3,
         ax2.set_ylabel('SW flux [/cm2/s]')
 
 
+    cb = fig.colorbar(sc, ax=ax)
+    cb2 = fig.colorbar(sc2, ax=ax2)
+    cb.set_label('Brightness [kR]', rotation=270)
+    cb2.set_label('Brightness [kR]', rotation=270)
     plt.tight_layout()
     #plt.show()
 
@@ -735,7 +746,7 @@ def plot_overview_altdiff_map(sorbit=700, eorbit=10000, selec_region=[5,0,1,2,3,
 
 
 
-def plot_overview_orbdiff(sorbit=700, eorbit=10000,  selec_region=[5,0,1,2,3,4], use_palist=False):
+def plot_overview_orbdiff(sorbit=700, eorbit=10000,  selec_region=[2,3,4], use_palist=False):
 
     orbit_arr = np.arange(sorbit, eorbit) #orbit 5431 has an issue with spice??
 
