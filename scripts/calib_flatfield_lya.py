@@ -19,7 +19,7 @@ def plot_spa_dist(fflya, subplots=False, **kwarg):
     os.makedirs(path, exist_ok=True)
     plt.savefig(save_name)
 
-def save_flatfield(fflya, fitdeg=6):
+def save_flatfield_polyfit(fflya, fitdeg=6):
     # Delete nan values and sort data
     norm_ravel = fflya.norm.ravel()
     spa = np.array([fflya.spa_cent for i in range(fflya.norm.shape[1])]).T.ravel()
@@ -34,9 +34,9 @@ def save_flatfield(fflya, fitdeg=6):
     func_poly = np.poly1d(p)
     x = np.arange(1024)
     ff = func_poly(x)
-    spamin = np.nanmin(spa_sort)
-    spamax = np.nanmax(spa_sort)
-    ff[(ff<spamin)|(ff>spamax)] = np.nan
+    #spamin = np.nanmin(spa_sort)
+    #spamax = np.nanmax(spa_sort)
+    #ff[(ff<spamin)|(ff>spamax)] = np.nan
     path = saveloc + 'calib/flatfield/lya/'
     save_name = path + 'fflya_v0'
     np.save(save_name, ff)
@@ -52,6 +52,37 @@ def save_flatfield(fflya, fitdeg=6):
     figname = path + 'poly_fflya_v0'
     plt.savefig(figname)
 
+def save_flatfield_rolling_avg(fflya, spa_window=20):
+    norm_mean = np.zeros(1024)
+    norm_mean[0:spa_window] = np.nan
+    norm_mean[1024-spa_window:1024] = np.nan
+    for ispa in range(spa_window, 1024-spa_window):
+        spalim = [ispa-spa_window, ispa+spa_window]
+        idxspa = np.where((fflya.spa_cent>=spalim[0])&(fflya.spa_cent<spalim[1]))
+        if np.size(idxspa) == 0:
+            norm_mean[ispa] = np.nan
+            continue
+        norm_selec = fflya.norm[idxspa]
+        med = np.nanmedian(norm_selec)
+        MAD = np.nanmedian(np.abs(norm_selec - med))
+        MADlim = [med-5*MAD, med+5*MAD]
+        idx_inMAD = np.where((norm_selec>MADlim[0])&(norm_selec<MADlim[1]))
+        norm_mean[ispa] = np.nanmean(norm_selec[idx_inMAD])
+
+    idx_minmax = [int(np.min(fflya.spa_cent)), int(np.max(fflya.spa_cent))]
+    norm_mean[:idx_minmax[0]] = np.nan
+    norm_mean[idx_minmax[1]:1024] = np.nan
+    path = saveloc + 'calib/flatfield/lya/'
+    save_name = path + 'fflya_rollavg_v0'
+    np.save(save_name, norm_mean)
+
+    fig, ax = plt.subplots(1,1, figsize=(10, 6))
+    fflya.plot_spa_dist(ax)
+    ax.plot(np.arange(1024), norm_mean, '-Dg', zorder=np.size(fflya.wv))
+    ax.set_xlim(0,1024)
+    ax.set_ylim(0.7, 1.3)
+
+
 if __name__ == '__main__':
 
     fname_list = ['bet_cma_tot_ff_fuv_orbit05170-5290_11bin.sav',
@@ -61,7 +92,6 @@ if __name__ == '__main__':
                   #'alpcma_tot_ff_fuv_orbit08040-08174_v2.sav']
 
     orb_mids = [5230, 5306, 6394, 6716] #, 8040]
-
 
     for i, ifname in enumerate(fname_list):
         if i==0:
@@ -73,4 +103,5 @@ if __name__ == '__main__':
             fflya.append_data(fflya_tmp)
 
     plot_spa_dist(fflya)
-    save_flatfield(fflya)
+    save_flatfield_polyfit(fflya)
+    #save_flatfield_rolling_avg(fflya)
