@@ -19,26 +19,31 @@ def plot_spa_dist(fflya, subplots=False, **kwarg):
     os.makedirs(path, exist_ok=True)
     plt.savefig(save_name)
 
-def save_flatfield_polyfit(fflya, fitdeg=6):
+def save_flatfield_polyfit(fflya, fitdeg=6, focused_lim=[80, 920]):
     # Delete nan values and sort data
     norm_ravel = fflya.norm.ravel()
+    print(norm_ravel, norm_ravel.shape)
     spa = np.array([fflya.spa_cent for i in range(fflya.norm.shape[1])]).T.ravel()
     spa_nonnan = spa[~np.isnan(norm_ravel)]
     norm_nonnan = norm_ravel[~np.isnan(norm_ravel)]
     idx_sort = np.argsort(spa_nonnan)
     spa_sort = spa_nonnan[idx_sort]
     norm_sort = norm_nonnan[idx_sort]
+    print(spa_sort, norm_sort)
 
     # fit data, get a polynomial function, and save the flatfield
     p = np.polyfit(spa_sort, norm_sort , fitdeg)
     func_poly = np.poly1d(p)
     x = np.arange(1024)
-    ff = func_poly(x)
+    poly_curv = func_poly(x)
+    ff = poly_curv/np.mean(poly_curv[focused_lim[0]:focused_lim[1]])
+    ff[:focused_lim[0]] = np.nan
+    ff[focused_lim[1]:] = np.nan
     #spamin = np.nanmin(spa_sort)
     #spamax = np.nanmax(spa_sort)
     #ff[(ff<spamin)|(ff>spamax)] = np.nan
     path = saveloc + 'calib/flatfield/lya/'
-    save_name = path + 'fflya_v0'
+    save_name = path + 'fflya_v1_nan'
     np.save(save_name, ff)
 
     # plot
@@ -46,10 +51,10 @@ def save_flatfield_polyfit(fflya, fitdeg=6):
     ax.set_title('polynomial fit result: deg='+str(fitdeg))
     ax.set_xlabel('spa_bin')
     ax.plot(spa, norm_ravel, 'o')
-    ax.plot(spa_sort, func_poly(spa_sort))
+    ax.plot(x, ff)
     ax.set_xlim(0,1024)
     ax.set_ylim(0.7, 1.3)
-    figname = path + 'poly_fflya_v0'
+    figname = path + 'poly_fflya_v1_nan'
     plt.savefig(figname)
 
 def save_flatfield_rolling_avg(fflya, spa_window=20):
