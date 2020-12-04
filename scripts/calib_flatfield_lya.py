@@ -75,10 +75,12 @@ def save_flatfield_rolling_avg(fflya, spa_window=20):
         norm_mean[ispa] = np.nanmean(norm_selec[idx_inMAD])
 
     idx_minmax = [int(np.min(fflya.spa_cent)), int(np.max(fflya.spa_cent))]
-    norm_mean[:idx_minmax[0]] = np.nan
-    norm_mean[idx_minmax[1]:1024] = np.nan
+    #norm_mean[:idx_minmax[0]] = np.nan
+    #norm_mean[idx_minmax[1]:1024] = np.nan
+    norm_mean[:80] = np.nan
+    norm_mean[921:1024] = np.nan
     path = saveloc + 'calib/flatfield/lya/'
-    save_name = path + 'fflya_rollavg_v0'
+    save_name = path + 'fflya_rollavg_v1'
     np.save(save_name, norm_mean)
 
     fig, ax = plt.subplots(1,1, figsize=(10, 6))
