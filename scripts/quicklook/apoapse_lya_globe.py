@@ -55,7 +55,7 @@ class GlobeData:
 
             #self.flip = beta_flip(hdul)
             aposwath = ApoapseSwath(hdul)
-            primary_arr = aposwath.get_img()
+            primary_arr = aposwath.fit_line()#get_img()
 
             # this is copied directly from Sonal; someday I'll figure it out and comment...
             # essentially it finds the place where the pixel position vector intersects the 400x400 grid
@@ -131,7 +131,7 @@ def quicklook_apoapse_globe(orbit_number):
         if nan_ok and echelle_ok:
             fig = plt.figure(figsize=(6, 6))
             ax = fig.add_subplot(111)
-            mesh = glb.plot(ax=ax, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=30))
+            mesh = glb.plot(ax=ax, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=20))
             ax.set_xlabel('[km]')
             ax.set_ylabel('[km]')
             ax.set_aspect(1)
