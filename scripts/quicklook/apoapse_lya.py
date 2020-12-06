@@ -19,7 +19,7 @@ def quicklook_apoapse(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
             ltgeo = LocalTimeGeo(hdul, iswath_number)
             latlongeo = LatLonGeo(hdul, iswath_number)
             #mesh0 = aposwath.plot(ax0, cmap=H_colormap(), norm=mpl.colors.LogNorm(vmin=1e-1, vmax=50))
-            mesh0 = aposwath.plot(ax0, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=50))
+            mesh0 = aposwath.plot(ax0, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=30))
             mesh1 = szageo.plot(ax1, cmap=plt.get_cmap('magma_r', 18))
             mesh2 = ltgeo.plot(ax2, cmap=plt.get_cmap('twilight_shifted', 24))
             mesh3 = latlongeo.plot_lat(ax3, cmap=plt.get_cmap('coolwarm', 18))
