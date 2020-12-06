@@ -4,13 +4,17 @@ IUVS l2b data module
 author: K. Masunaga (kei.masunaga@lasp.colorado.edu)
 """
 
+import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
+import warnings
+import os
 
 from PyUVS.graphics import angle_meshgrid, H_colormap, NO_colormap
 from PyUVS.variables import slit_width_deg
 from PyUVS.data import get_apoapse_files as get_swath_info
 from PyUVS.variables import data_directory as dataloc
+from chaffin.paths import anc_dir
 
 class ApoapseInfo:
     def __init__(self, orbit_number, level='l2b', channel='fuv'):
@@ -39,19 +43,35 @@ class ApoapseSwath:
         self.swath_number = swath_number
         self.linename = linename
 
-    def get_img(self):
+    def get_img(self, flatfield_correct=True):
         data = self.hdul['primary'].data
         if self.linename == 'Lya':
-            img = data[:,:,0]
+            self.img = data[:,:,0]
         if self.linename == 'OI1304':
-            img = data[:,:,1]
+            self.img = data[:,:,1]
         if self.linename == 'OI1356':
-            img = data[:,:,2]
+            self.img = data[:,:,2]
         if self.linename == 'CII1336':
-            img = data[:,:,3]
+            self.img = data[:,:,3]
         if self.linename == 'Solar':
-            img = data[:,:,4]
-        return img
+            self.img = data[:,:,4]
+        if flatfield_correct:
+            self.apply_flatfield()
+        return self.img
+
+    def apply_flatfield(self):
+        spatial_binning = np.concatenate([self.hdul['Binning'].data['SPAPIXLO'][0],
+                                         [self.hdul['Binning'].data['SPAPIXHI'][0][-1]+1]])
+        if self.linename == 'Lya':
+            #slit_flatfield = np.load(os.path.join(anc_dir, 'kei_flatfield_polynomial_25Nov2020.npy'))
+            slit_flatfield = np.load(os.path.join(anc_dir, 'bad_flatfield_23Sep2020.npy'))
+        else:
+            warnings.warn('Binning is not periapsis--- using a very rough FUV flatfield.')
+            slit_flatfield = np.load(os.path.join(anc_dir, 'bad_flatfield_23Sep2020.npy'))
+        flatfield = np.array([np.mean(slit_flatfield[p0:p1]) for p0,p1 in zip(spatial_binning[:-1], spatial_binning[1:])])
+        nint = self.img.shape[0]
+        for iint in range(nint):
+            self.img[iint, :] /= flatfield
 
     def get_xygrids(self):
         x, y = angle_meshgrid(self.hdul)
@@ -72,14 +92,14 @@ class ApoapseSwath:
             pass
         return cmap
 
-    def plot(self, ax=None, **kwargs):
-        img = self.get_img()
+    def plot(self, ax=None, flatfield_correct=True, **kwargs):
+        img = self.get_img(flatfield_correct=flatfield_correct)
         x, y = self.get_xygrids()
 
         if ax is None:
-            mesh = plt.pcolormesh(x, y, img, cmap=self.get_cmap(), **kwargs)
+            mesh = plt.pcolormesh(x, y, img, **kwargs)
         else:
-            mesh = ax.pcolormesh(x, y, img, cmap=self.get_cmap(), **kwargs)
+            mesh = ax.pcolormesh(x, y, img, **kwargs)
 
         return mesh
 
@@ -218,6 +238,41 @@ def plot_apoapse_lt_geo(orbit_number, ax=None, **kwargs):
     ax.set_ylabel('Integrations')
     return mesh
 
+class LatLonGeo:
+    def __init__(self, hdul, swath_number=0):
+        self.hdul = hdul
+        self.swath_number = swath_number
+        self.lat = hdul['PixelGeometry'].data['PIXEL_CORNER_LAT']
+        self.lon = hdul['PixelGeometry'].data['PIXEL_CORNER_LON']
+        self.mrh_alt = hdul['PixelGeometry'].data['PIXEL_CORNER_MRH_ALT']
+
+    def get_xygrids(self):
+        x, y = angle_meshgrid(self.hdul)
+        x += slit_width_deg * self.swath_number
+        y = (120 - y) + 60
+        return x, y
+
+    def plot_lat(self, ax=None, **kwargs):
+        # Check what the third dimension of mrh_alt!!
+        img = np.where(self.mrh_alt[:,:,4] == 0, self.lat[:,:,4], np.nan)
+        x, y = self.get_xygrids()
+        if ax is None:
+            mesh = plt.pcolormesh(x, y, img, vmin=-90, vmax=90, **kwargs)
+        else:
+            mesh = ax.pcolormesh(x, y, img, vmin=-90, vmax=90, **kwargs)
+
+        return mesh
+
+    def plot_lon(self, ax=None, **kwargs):
+        # Check what the third dimension of mrh_alt!!
+        img = np.where(self.mrh_alt[:,:,4] == 0, self.lon[:,:,4], np.nan)
+        x, y = self.get_xygrids()
+        if ax is None:
+            mesh = plt.pcolormesh(x, y, img, vmin=0, vmax=360, **kwargs)
+        else:
+            mesh = ax.pcolormesh(x, y, img, vmin=0, vmax=360, **kwargs)
+
+        return mesh
 
 
 def test():
