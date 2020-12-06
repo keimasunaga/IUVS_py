@@ -91,7 +91,7 @@ class ApoapseSwath:
         self.wv0 = wv0
         self.wv_width = wv_width
         if set_img:
-            self.img = self.get_img(counts=counts)
+            self.img = self.fit_line()#self.get_img(counts=counts)
             self.xgrids, self.ygrids = self.get_xygrids()
         else:
             self.img = None
@@ -120,8 +120,8 @@ class ApoapseSwath:
             img = counts_sum*cal_intp[None, :]
         return img
 
-    def fit_line(self):
-        return fit_line(self.hdul, self.wv0)
+    def fit_line(self, flatfield_correct=False, correct_muv=False):
+        return fit_line(self.hdul, self.wv0, flatfield_correct=flatfield_correct, correct_muv=correct_muv)
 
     def get_xygrids(self):
         x, y = angle_meshgrid(self.hdul)
