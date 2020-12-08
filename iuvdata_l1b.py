@@ -30,12 +30,13 @@ class ApoapseInfo:
     ApoapseInfo object
     '''
 
-    def __init__(self, orbit_number, level='l1b', channel='fuv'):
+    def __init__(self, orbit_number, level='l1b', channel='fuv', product_type='production'):
         self.segment = 'apoapse'
         self.orbit_number = orbit_number
         self.level = level
         self.channel = channel
-        swath_info = get_swath_info(self.orbit_number, directory=dataloc, level=self.level, channel=channel)
+        self.product_type = product_type
+        swath_info = get_swath_info(self.orbit_number, directory=dataloc, level=self.level, channel=channel, product_type=product_type)
         self.files = swath_info['files']
         self.n_files = int(len(self.files))
         self.n_swaths = swath_info['n_swaths']
@@ -143,7 +144,7 @@ class ApoapseSwath:
         obj.xgrids, obj.ygrids = self.xgrids, self.ygrids
         return obj
 
-def get_apoapseinfo(orbit_number, level='l1b', channel='fuv'):
+def get_apoapseinfo(orbit_number, level='l1b', channel='fuv', product_type='production'):
     '''
     Returns an apoapse info object created by the ApoapseInfo class.
 
@@ -161,7 +162,7 @@ def get_apoapseinfo(orbit_number, level='l1b', channel='fuv'):
     apoinfo : ApoapseInfo object
         An apoapse information object.
     '''
-    apoinfo = ApoapseInfo(orbit_number, channel=channel)
+    apoinfo = ApoapseInfo(orbit_number, channel=channel, product_type=product_type)
     return apoinfo
 
 

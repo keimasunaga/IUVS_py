@@ -4,6 +4,7 @@ __pycache__/*
 notebook/*
 scripts/__pycache__/*
 scripts/quicklook/__pycache__/*
+scripts/quicklook/stage/__pycache__/*
 flgpkg/__pycache__/*
 test/__pycache__/*
 lib/PyUVS/__pycache__/*

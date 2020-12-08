@@ -6,7 +6,7 @@ This file has to be imported first when you use IUVS lib.
 import sys
 from datetime import datetime
 workpath = '/Users/masunaga/work/python_git/maven/iuvs/'
-dirs = ['test', 'scripts', 'scripts/quicklook', 'lib', 'pfptools']
+dirs = ['test', 'scripts', 'scripts/quicklook', 'scripts/quicklook/stage', 'lib', 'pfptools']
 [sys.path.append(workpath + idir) for idir in dirs]
 
 ## import reload function

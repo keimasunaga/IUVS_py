@@ -515,7 +515,7 @@ def sync_data(spice=True, l1b=True):
     print('Data syncing and cleanup took %.2d:%.2d:%.2d.' % (h, m, s))
 
 
-def get_files(orbit_number, directory=data_directory, level='l1b', segment='apoapse', channel='muv', count=False):
+def get_files(orbit_number, directory=data_directory, level='l1b', segment='apoapse', channel='muv', count=False, product_type='production'):
     """
     Return file paths to FITS files for a given orbit number.
 
@@ -544,8 +544,10 @@ def get_files(orbit_number, directory=data_directory, level='l1b', segment='apoa
     orbit_block = int(orbit_number / 100) * 100
 
     # location of FITS files (this will change depending on the user)
-    filepath = os.path.join(directory, 'level'+level[1:]+'/orbit%.5d/' % orbit_block)
-
+    if product_type=='production':
+        filepath = os.path.join(directory, 'level'+level[1:]+'/orbit%.5d/' % orbit_block)
+    elif product_type=='stage':
+        filepath = os.path.join(directory+'stage/', 'level'+level[1:]+'/orbit%.5d/' % orbit_block)
     # format of FITS file names
     filename_str = '*%s-orbit%.5d-%s*.fits.gz' % (segment, orbit_number, channel)
 
@@ -562,7 +564,7 @@ def get_files(orbit_number, directory=data_directory, level='l1b', segment='apoa
         return files, n_files
 
 
-def get_apoapse_files(orbit_number, directory=data_directory, level='l1b', channel='fuv'):
+def get_apoapse_files(orbit_number, directory=data_directory, level='l1b', channel='fuv', product_type='production'):
     """
     Convenience function for apoapse data. In addition to returning file paths to the data, it determines how many
     swaths were taken, which swath each file belongs to since there are often 2-3 files per swath, whether the MCP
@@ -588,7 +590,7 @@ def get_apoapse_files(orbit_number, directory=data_directory, level='l1b', chann
 
     # get list of FITS files for given orbit number
     files, n_files = get_files(orbit_number, directory=directory, level=level, segment='apoapse', channel=channel,
-                               count=True)
+                               count=True, product_type=product_type)
 
     # set initial counters
     n_swaths = 0
