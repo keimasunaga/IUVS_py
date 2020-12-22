@@ -29,11 +29,11 @@ def quicklook_apoapse(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
             #mesh3 = latlongeo.plot_lon(ax3, cmap=plt.get_cmap('twilight_shifted', 36))
 
         #fig.suptitle(time0 + ', Orbit ' + '{:05d}'.format(orbit_number), fontsize=12)
-        ax0.set_title(time0 + 'Orbit ' + '{:05d}'.format(orbit_number) + ' Apoapse ' + str(wv0) + ' nm')
+        ax0.set_title(time0 + ' Orbit ' + '{:05d}'.format(orbit_number) + ' Apoapse ' + str(wv0) + ' nm')
         ax0.set_xlabel('Spatial bins')
         ax0.set_ylabel('Integrations')
         cb0 = plt.colorbar(mesh0, ax=ax0)
-        cb0.set_label('Brightness [kR^0.5]')
+        cb0.set_label('Brightness [kR]')
 
         ax1.set_title('Orbit ' + '{:05d}'.format(orbit_number) + ' SZA')
         ax1.set_xlabel('Spatial bins')
