@@ -121,7 +121,7 @@ class ApoapseSwath:
             img = counts_sum*cal_intp[None, :]
         return img
 
-    def fit_line(self, flatfield_correct=False, correct_muv=False):
+    def fit_line(self, flatfield_correct=True, correct_muv=False):
         return fit_line(self.hdul, self.wv0, flatfield_correct=flatfield_correct, correct_muv=correct_muv)
 
     def get_xygrids(self):
