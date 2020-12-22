@@ -123,14 +123,14 @@ def fit_line(myfits, l0, calibrate=True, flatfield_correct=True, plot=False, cor
                                                  [myfits['Binning'].data['SPAPIXHI'][0][-1]+1]])
         if np.array_equal(myfits_spatial_binning,periapse_spatial_binning):
             #this is a periapse-binned file, we can use an empirical flat field from periapse
+            warnings.warn('--- using seven_segment FUV flatfield.')
             flatfield = seven_segment_flatfield
         else:
-            #warnings.warn('Binning is not periapsis--- using a very rough FUV flatfield.')
+            warnings.warn('--- using a kei FUV flatfield.')
             #slit_flatfield = np.load(os.path.join(anc_dir, 'bad_flatfield_23Sep2020.npy'))
             slit_flatfield = np.load(os.path.join(anc_dir, 'kei_flatfield_polynomial_25Nov2020.npy'))#np.load('/Users/masunaga/work/python_git/maven/iuvs/products/calib/flatfield/lya/fflya_v1.npy')
             flatfield = np.array([np.mean(slit_flatfield[p0:p1]) for p0,p1 in zip(myfits_spatial_binning[:-1],
                                                                                   myfits_spatial_binning[1:])])
-            pass
 
     filedims = myfits['Primary'].shape
     n_int = filedims[0]
