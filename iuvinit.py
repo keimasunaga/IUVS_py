@@ -9,6 +9,9 @@ workpath = '/Users/masunaga/work/python_git/maven/iuvs/'
 dirs = ['test', 'scripts', 'scripts/quicklook', 'scripts/quicklook/stage', 'lib', 'pfptools']
 [sys.path.append(workpath + idir) for idir in dirs]
 
+maven_iuvs_path = '/Users/masunaga/work/python_git/maven/lasp_iuvs/maven_iuvs'
+sys.path.append(maven_iuvs_path)
+
 ## import reload function
 from importlib import reload
 
