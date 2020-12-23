@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os, sys
 from iuvdata_l1b import get_apoapseinfo, ApoapseSwath, SzaGeo, LocalTimeGeo, LatLonGeo
-from PyUVS.graphics import H_colormap
+from maven_iuvs.graphics import H_colormap
 from variables import saveloc
 from iuvtools.time import get_timeDt, Dt2str
 
