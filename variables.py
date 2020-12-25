@@ -3,7 +3,7 @@ class IuvRc:
         self.iuvdataloc = '/Volumes/Fenix/work/data/maven_iuvs/'
         self.pfpdataloc = '/Volumes/Fenix/work/data/maven/data/sci/'
         self.saveloc = '/Users/masunaga/work/python_git/maven/iuvs/products/'
-        self.spiceloc = '/Volumes/Fenix/data/maven_iuvs/spice/'
+        self.spiceloc = '/Volumes/Fenix/work/data/maven_iuvs/spice/'
 
 # IUVS data directory
 iuvdataloc = IuvRc().iuvdataloc
