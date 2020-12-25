@@ -45,6 +45,19 @@ class ApoapseInfo:
         self.beta_flip = swath_info['beta_flip']
         self.sDt = swath_info['sDt']
         self.eDt = swath_info['eDt']
+        self.file_version = self._get_file_version()
+
+    def _get_file_version(self):
+        # get files and extract data versions; if no files version is
+        # 'missing'
+        try:
+            version_str = self.files[0].split('_')[-2:]
+            data_version = '%s_%s' % (version_str[0], version_str[1][0:3])
+        except IndexError:
+            data_version = 'missing'
+
+        # return data version string
+        return data_version
 
     def get_hdul(self, ith_file):
         '''
