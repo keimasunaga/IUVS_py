@@ -311,6 +311,30 @@ class LatLonGeo:
 
         return mesh
 
+
+class AltGeo:
+    def __init__(self, hdul, swath_number=0):
+        self.hdul = hdul
+        self.swath_number = swath_number
+        self.data = hdul['PixelGeometry'].data['PIXEL_CORNER_MRH_ALT'][:,:,4]
+
+    def get_xygrids(self):
+        x, y = angle_meshgrid(self.hdul)
+        x += slit_width_deg * self.swath_number
+        y = (120 - y) + 60
+        return x, y
+
+    def plot(self, ax=None, **kwargs):
+        img = self.data
+        x, y = self.get_xygrids()
+        if ax is None:
+            mesh = plt.pcolormesh(x, y, img, vmin=0, **kwargs)
+        else:
+            mesh = ax.pcolormesh(x, y, img, vmin=0, **kwargs)
+
+        return mesh
+
+
 class FieldAngleGeo:
     def __init__(self, hdul, swath_number=0):
         # Read hdul and variables
