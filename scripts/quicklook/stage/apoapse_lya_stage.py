@@ -2,14 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os, sys
-from iuvdata_l1b import get_apoapseinfo, ApoapseSwath, SzaGeo, LocalTimeGeo, LatLonGeo, AltGeo
+
 from maven_iuvs.graphics import H_colormap
+
+from iuvdata_l1b import get_apoapseinfo, ApoapseSwath, SzaGeo, LocalTimeGeo, LatLonGeo, AltGeo
 from variables import saveloc
 from iuvtools.time import get_timeDt, Dt2str
 from iuvtools.info import get_solar_lon
 
 def quicklook_apoapse(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
-
     apoinfo = get_apoapseinfo(orbit_number, product_type='stage')
     fig, ax = plt.subplots(3, 2, figsize=(24, 16))
 
@@ -19,6 +20,8 @@ def quicklook_apoapse(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
             if ith_file==0:
                 time0 = Dt2str(get_timeDt(hdul)[0])
                 Ls0 = get_solar_lon(hdul)
+            if ith_file==apoinfo.n_files-1:
+                time_e = Dt2str(get_timeDt(hdul)[-1])
 
             aposwath = ApoapseSwath(hdul, iswath_number, wv0, wv_width)
             szageo = SzaGeo(hdul, iswath_number)
@@ -33,8 +36,7 @@ def quicklook_apoapse(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
             mesh4 = latlongeo.plot_lon(ax[1,1], cmap=plt.get_cmap('twilight_shifted', 36))
             mesh5 = latlongeo.plot_lat(ax[2,1], cmap=plt.get_cmap('coolwarm', 18))
 
-        Dt_apo = Dt2str(get_Dt_apo(orbit_number))
-        fig.suptitle('Orbit ' + '{:05d}'.format(orbit_number)+ '\n'+Dt_apo  + '\n Ls=' + '{:.1f}'.format(Ls0), y=0.95, fontsize=16)
+        fig.suptitle('Orbit ' + '{:05d}'.format(orbit_number)+ ' (' + apoinfo.file_version+')'+ '\n'+time0 +' -> ' + time_e + '\n Ls=' + '{:.1f}'.format(Ls0), y=0.95, fontsize=16)
 
         #fig.suptitle(time0 + ', Orbit ' + '{:05d}'.format(orbit_number), fontsize=12)
         ax[0,0].set_title(' Orbit ' + '{:05d}'.format(orbit_number) + ' Apoapse ' + str(wv0) + ' nm')
