@@ -10,12 +10,12 @@ from skimage.transform import resize
 
 # import PyUVS
 import sys
-sys.path.append('/Users/milby/Documents/Work/MAVEN/Python')
+#sys.path.append('/Users/milby/Documents/Work/MAVEN/Python')
 from PyUVS.spice import load_iuvs_spice
 
 # set data directory
-data_directory = '/Volumes/MAVEN Data/iuvs_data/'
-
+from variables import iuvdataloc as data_directory#data_directory = '/Volumes/MAVEN Data/iuvs_data/'
+from variables import saveloc
 
 def get_files(orbit_number, directory=data_directory, segment='apoapse', channel='muv', count=False):
     """
@@ -66,8 +66,8 @@ def get_files(orbit_number, directory=data_directory, segment='apoapse', channel
 
 def beta_flip(hdulist):
     """
-    Determine the spacecraft orientation and see if the APP is "beta-flipped," meaning rotated 180 degrees. 
-    This compares the instrument x-axis direction to the spacecraft velocity direction in an inertial reference frame, 
+    Determine the spacecraft orientation and see if the APP is "beta-flipped," meaning rotated 180 degrees.
+    This compares the instrument x-axis direction to the spacecraft velocity direction in an inertial reference frame,
     which are either (nearly) parallel or anti-parallel.
 
     Parameters
@@ -277,7 +277,7 @@ def highres_swath_geometry(hdulist, res=200):
     context_map_arr = np.zeros((hifi_int, hifi_spa, 3))*np.nan
 
     # load Mars magnetic field map
-    mars_surface_map = plt.imread('/Users/milby/Desktop/br_no_labels.jpg')
+    mars_surface_map = plt.imread(saveloc+'/misc_items/bfield_map/br_no_labels.jpg')
     mars_surface_map = resize(mars_surface_map, [1800, 3600, 3])
 
     # calculate intercept latitude and longitude using SPICE, looping through each high-resolution pixel
@@ -458,7 +458,7 @@ for file in range(n_files):
         pass
 
 # figure out where to save it
-savepath = '/Users/milby/Desktop/test.png'
+savepath = saveloc + 'test/test.png'#+ '/Users/milby/Desktop/test.png'
 
 # save quicklook
 plt.savefig(savepath, facecolor=fig.get_facecolor(), edgecolor='none', dpi=300)
