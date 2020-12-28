@@ -11,7 +11,7 @@ from skimage.transform import resize
 # import PyUVS
 import sys
 #sys.path.append('/Users/milby/Documents/Work/MAVEN/Python')
-from PyUVS.spice import load_iuvs_spice
+from maven_iuvs.spice import load_iuvs_spice
 
 # set data directory
 #data_directory = '/Volumes/MAVEN Data/iuvs_data/'
@@ -408,7 +408,7 @@ load_iuvs_spice()
 slit_width_deg = 10
 
 # get orbit number
-orbit = 592
+orbit = 592#12887
 
 # get files
 apoapse_data = get_apoapse_files(orbit, channel='fuv')
@@ -459,7 +459,7 @@ for file in range(n_files):
         pass
 
 # figure out where to save it
-savepath = saveloc + '/test/test_bfield_projection.png'
+savepath = saveloc + '/test/test_bfield_projection_orb592_zac.png'
 
 # save quicklook
 plt.savefig(savepath, facecolor=fig.get_facecolor(), edgecolor='none', dpi=300)
