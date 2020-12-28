@@ -17,189 +17,8 @@ from PyUVS.spice import load_iuvs_spice
 #data_directory = '/Volumes/MAVEN Data/iuvs_data/'
 from variables import iuvdataloc as data_directory
 from variables import saveloc
-
-def get_files(orbit_number, directory=data_directory, segment='apoapse', channel='muv', count=False):
-    """
-    Return file paths to FITS files for a given orbit number.
-
-    Parameters
-    ----------
-    orbit_number : int
-        The MAVEN orbit number.
-    directory : str
-        Absolute system path to the location containing orbit block folders ("orbit01300", orbit01400", etc.)
-    segment : str
-        The orbit segment for which you want data files. Defaults to 'apoapse'.
-    channel : str
-        The instrument channel. Defaults to 'muv'.
-    count : bool
-        Whether or not to return the number of files.
-
-    Returns
-    -------
-    files : array
-        A sorted list of the file paths to the FITS files.
-    n_files : int
-        The number of files.
-    """
-
-    # determine orbit block (directories which group data by 100s)
-    orbit_block = int(orbit_number / 100) * 100
-
-    # location of FITS files (this will change depending on the user)
-    filepath = os.path.join(directory, 'level1b/orbit%.5d/' % orbit_block)
-
-    # format of FITS file names
-    filename_str = '*%s-orbit%.5d-%s*.fits.gz' % (segment, orbit_number, channel)
-
-    # get list of files
-    files_list = sorted(glob.glob(os.path.join(filepath, filename_str)))
-
-    # get number of files
-    files_count = int(len(files_list))
-
-    # return the list of files with the count if requested
-    if not count:
-        return files_list
-    else:
-        return files_list, files_count
-
-
-def beta_flip(hdulist):
-    """
-    Determine the spacecraft orientation and see if the APP is "beta-flipped," meaning rotated 180 degrees.
-    This compares the instrument x-axis direction to the spacecraft velocity direction in an inertial reference frame,
-    which are either (nearly) parallel or anti-parallel.
-
-    Parameters
-    ----------
-    hdulist : hdulistist
-        Opened FITS file.
-
-    Returns
-    -------
-    beta_flipped : bool, str
-        Returns bool True of False if orientation can be determined, otherwise returns the string "unknown".
-
-    """
-
-    # get the instrument's x-direction vector which is parallel to the spacecraft's motion
-    vi = hdulist['spacecraftgeometry'].data['vx_instrument_inertial'][-1]
-
-    # get the spacecraft's velocity vector
-    vs = hdulist['spacecraftgeometry'].data['v_spacecraft_rate_inertial'][-1]
-
-    # determine orientation between vectors (if they are aligned or anti-aligned)
-    app_sign = np.sign(np.dot(vi, vs))
-
-    # if negative then no beta flipping, if positive then yes beta flipping, otherwise state is unknown
-    if app_sign == -1:
-        beta_flipped = False
-    elif app_sign == 1:
-        beta_flipped = True
-    else:
-        beta_flipped = 'unknown'
-
-    # return the result
-    return beta_flipped
-
-
-def get_apoapse_files(orbit_number, channel='muv', directory=data_directory):
-    """
-    Convenience function for apoapse data. In addition to returning file paths to the data, it determines how many
-    swaths were taken, which swath each file belongs to since there are often 2-3 files per swath, whether the MCP
-    voltage settings were for daytime or nighttime, the mirror step between integrations, and the beta-angle orientation
-    of the APP.
-
-    Parameters
-    ----------
-    orbit_number : int
-        The MAVEN orbit number.
-    channel : str
-        The instrument channel. Defaults to 'muv'.
-    directory : str
-        Absolute path to your IUVS level 1B data directory which has the orbit blocks, e.g., "orbit03400, orbit03500,"
-        etc.
-
-    Returns
-    -------
-    swath_info : dict
-        A dictionary containing filepaths to the requested data files, the number of swaths, the swath number
-        for each data file, whether or not the file is a dayside file, and whether the APP was beta-flipped
-        during this orbit.
-
-    """
-
-    # get list of FITS files for given orbit number
-    files_list, files_count = get_files(orbit_number, directory=directory, segment='apoapse', channel=channel,
-                                        count=True)
-
-    # set initial counters
-    no_swaths = 0
-    prev_ang = 999
-
-    # arrays to hold final file paths, etc.
-    filepaths = []
-    daynight = []
-    swath = []
-    flipped = []
-
-    # loop through files...
-    for i in range(files_count):
-
-        # open FITS file
-        hdullist = fits.open(files_list[i])
-
-        # skip single integrations, they are more trouble than they're worth
-        if hdullist['primary'].data.ndim == 2:
-            continue
-
-        # determine if beta-flipped
-        flipped.append(beta_flip(hdullist))
-
-        # store filepath
-        filepaths.append(files_list[i])
-
-        # determine if dayside or nightside
-        if hdullist['observation'].data['mcp_volt'] > 700:
-            daynight.append(False)
-        else:
-            daynight.append(True)
-
-        # calcualte mirror direction
-        mirror_dir = np.sign(hdullist['integration'].data['mirror_deg'][-1] -
-                             hdullist['integration'].data['mirror_deg'][0])
-        if prev_ang == 999:
-            prev_ang *= mirror_dir
-
-        # check the angles by seeing if the mirror is still scanning in the same direction
-        ang0 = hdullist['integration'].data['mirror_deg'][0]
-        if ((mirror_dir == 1) & (prev_ang > ang0)) | ((mirror_dir == -1) & (prev_ang < ang0)):
-            # increment the swath count
-            no_swaths += 1
-
-        # store swath number
-        swath.append(no_swaths - 1)
-
-        # change the previous angle comparison value
-        prev_ang = hdullist['integration'].data['mirror_deg'][-1]
-
-    # check beta flipping
-    if len(np.unique(flipped)) != 1:
-        flipped = mode(flipped)
-
-    # make a dictionary to hold all this shit
-    swath_info = {
-        'files': np.array(filepaths),
-        'n_swaths': no_swaths,
-        'swath_number': np.array(swath),
-        'dayside': np.array(daynight),
-        'beta_flip': flipped,
-    }
-
-    # return the dictionary
-    return swath_info
-
+from maven_iuvs.search import get_files, get_apoapse_files
+from maven_iuvs.geometry import beta_flip
 
 def highres_swath_geometry(hdulist, res=200):
     """
@@ -408,7 +227,7 @@ load_iuvs_spice()
 slit_width_deg = 10
 
 # get orbit number
-orbit = 592
+orbit = 12888
 
 # get files
 apoapse_data = get_apoapse_files(orbit, channel='fuv')
@@ -459,7 +278,7 @@ for file in range(n_files):
         pass
 
 # figure out where to save it
-savepath = saveloc + '/test/test_bfield_projection_nb.png'
+savepath = saveloc + '/test/test_bfield_projection_orb12888.png'
 
 # save quicklook
 plt.savefig(savepath, facecolor=fig.get_facecolor(), edgecolor='none', dpi=300)
