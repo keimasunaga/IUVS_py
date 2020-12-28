@@ -37,16 +37,21 @@ def plot_bfield_map_no_labels(comp='br', altbin=0):
     lat = np.arange(180) - 90
     lon = np.arange(360)
     lat_shifted, lon_shifted = shift_grids(lat, lon)
-    fig = plt.figure(figsize=(20,10))
-    ax = fig.add_subplot(111)
-    mesh = ax.pcolormesh(lon_shifted, lat_shifted, bmap, cmap='coolwarm', vmin=-100, vmax=100)
-    plt.xticks([])
-    plt.yticks([])
-    ax.axis('off')
+    fig = plt.figure(figsize=(36, 18))
+    ax = plt.axes([0, 0, 1, 1])
+    ax.set_frame_on(False)
+    ax.imshow(bmap, origin='lower', cmap='coolwarm', vmin=-100, vmax=100)
+    #fig = plt.figure(figsize=(20,10))
+    #ax = fig.add_subplot(111)
+    #mesh = ax.pcolormesh(lon_shifted, lat_shifted, bmap, cmap='coolwarm', vmin=-100, vmax=100)
+    #plt.xticks([])
+    #plt.yticks([])
+    #ax.axis('off')
     path = saveloc + 'misc_items/bfield_map/'
     os.makedirs(path, exist_ok=True)
     fname = comp + '_no_labels.jpg'
-    plt.savefig(path + fname)
+    plt.savefig(path + fname, dpi=100)
+    print('saved!')
 
 def test_plot():
     plot_bfield_map_no_labels('br',0)
