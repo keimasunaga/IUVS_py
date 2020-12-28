@@ -1,24 +1,21 @@
 import glob
-import os
+import os, sys
 from warnings import filterwarnings
-
 import matplotlib.pyplot as plt
 import numpy as np
 import spiceypy as spice
 from astropy.io import fits
 from skimage.transform import resize
 
-# import PyUVS
-import sys
-#sys.path.append('/Users/milby/Documents/Work/MAVEN/Python')
-from PyUVS.spice import load_iuvs_spice
-
-# set data directory
-#data_directory = '/Volumes/MAVEN Data/iuvs_data/'
-from variables import iuvdataloc as data_directory
-from variables import saveloc
 from maven_iuvs.search import get_files, get_apoapse_files
 from maven_iuvs.geometry import beta_flip
+from maven_iuvs.instrument import slit_width_deg
+from maven_iuvs.spice import load_iuvs_spice
+from maven_iuvs.user_paths import spice_dir
+
+from variables import iuvdataloc as data_directory
+from variables import saveloc
+
 
 def highres_swath_geometry(hdulist, res=200):
     """
@@ -217,69 +214,77 @@ def latlon_grid(cx, cy, latitude, longitude, axis):
     [l.set_rotation(0) for l in lonl2]
 
 
-# filter warnings, there are a lot and they are annoying
-filterwarnings('ignore')
+def main(orbit_number):
 
-# furnish SPICE kernels
-load_iuvs_spice()
+    # get files
+    apoapse_data = get_apoapse_files(orbit_number, channel='fuv')
+    files = apoapse_data['files']
+    n_files = len(files)
+    n_swaths = apoapse_data['n_swaths']
+    swath_number = apoapse_data['swath_number']
+    flip = apoapse_data['beta_flip']
 
-# set slit width
-slit_width_deg = 10
+    # make a figure and axes
+    fig, ax = plt.subplots(1, 1, figsize=(6, 4))
 
-# get orbit number
-orbit = 12888
+    # loop through files
+    for file in range(n_files):
 
-# get files
-apoapse_data = get_apoapse_files(orbit, channel='fuv')
-files = apoapse_data['files']
-n_files = len(files)
-n_swaths = apoapse_data['n_swaths']
-swath_number = apoapse_data['swath_number']
-flip = apoapse_data['beta_flip']
+        # open file
+        hdul = fits.open(files[file])
 
-# make a figure and axes
-fig, ax = plt.subplots(1, 1, figsize=(6, 4))
+        # determine spatial and spectral bins
+        n_spatial = len(hdul['binning'].data['spapixlo'][0])
+        n_spectral = len(hdul['binning'].data['spepixlo'][0])
 
-# loop through files
-for file in range(n_files):
+        # try to display the geometry data (sometimes coordinates are undefined and this fails)
+        try:
 
-    # open file
-    hdul = fits.open(files[file])
+            # calculate high-resolution geometry information
+            lat, lon, X, Y, cX, cY, context_map = highres_swath_geometry(hdul)
 
-    # determine spatial and spectral bins
-    n_spatial = len(hdul['binning'].data['spapixlo'][0])
-    n_spectral = len(hdul['binning'].data['spepixlo'][0])
+            # reshape map colors array
+            context_map_colors = context_map.reshape(context_map.shape[0] * context_map.shape[1], context_map.shape[2])
 
-    # try to display the geometry data (sometimes coordinates are undefined and this fails)
-    try:
+            # reverse Y array so it goes top-to-bottom instead of bottom-to-top
+            Y = (120 - Y) + 60
+            cY = (120 - cY) + 60
 
-        # calculate high-resolution geometry information
-        lat, lon, X, Y, cX, cY, context_map = highres_swath_geometry(hdul)
+            # offset X array by swath number
+            X += slit_width_deg * swath_number[file]
+            cX += slit_width_deg * swath_number[file]
 
-        # reshape map colors array
-        context_map_colors = context_map.reshape(context_map.shape[0] * context_map.shape[1], context_map.shape[2])
+            # display context map
+            ax.pcolormesh(X, Y, np.ones_like(X), color=context_map_colors, linewidth=0, edgecolors='none',
+                                   rasterized=True).set_array(None)
 
-        # reverse Y array so it goes top-to-bottom instead of bottom-to-top
-        Y = (120 - Y) + 60
-        cY = (120 - cY) + 60
+            # draw latitude/longitude grid on context map
+            latlon_grid(cX, cY, lat, lon, ax)
 
-        # offset X array by swath number
-        X += slit_width_deg * swath_number[file]
-        cX += slit_width_deg * swath_number[file]
+        except (ValueError, TypeError):
+            pass
 
-        # display context map
-        ax.pcolormesh(X, Y, np.ones_like(X), color=context_map_colors, linewidth=0, edgecolors='none',
-                               rasterized=True).set_array(None)
+    # figure out where to save it
+    savepath = saveloc + 'pfp/apoapse_crustal_field/'
+    os.makedirs(savepath, exist_ok=True)
+    figname = 'br_projection_orb' + '{:05d}'.format(orbit_number)+'.png'
 
-        # draw latitude/longitude grid on context map
-        latlon_grid(cX, cY, lat, lon, ax)
+    # save quicklook
+    plt.savefig(savepath+figname, facecolor=fig.get_facecolor(), edgecolor='none', dpi=100)
+    plt.close('all')
 
-    except (ValueError, TypeError):
-        pass
+if __name__ == '__main__':
 
-# figure out where to save it
-savepath = saveloc + '/test/test_bfield_projection_orb12888.png'
+    # filter warnings, there are a lot and they are annoying
+    filterwarnings('ignore')
 
-# save quicklook
-plt.savefig(savepath, facecolor=fig.get_facecolor(), edgecolor='none', dpi=300)
-plt.close('all')
+    # furnish SPICE kernels
+    load_iuvs_spice(spice_dir)
+
+    # get orbit number
+    start_orbit = int(sys.argv[1])
+    n_orbit = int(sys.argv[2])
+    orbit_arr = np.arange(n_orbit) + start_orbit
+    for iorbit_number in np.arange(n_orbit) + start_orbit:
+        main(iorbit_number)
+        plt.close()
