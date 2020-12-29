@@ -392,9 +392,9 @@ def save_globe_data(orbit_number):
             if primary_is_nan(hdul):
                 nan_ok = False
                 continue
-            if echelle_place_ok(hdul) is False:
-                echelle_ok = False
-                continue
+            #if echelle_place_ok(hdul) is False:
+            #    echelle_ok = False
+            #    continue
 
             fieldangle = FieldAngleGeo(hdul, iswath_number)
             fieldangle.calc_cone_angle(esw)
@@ -721,9 +721,10 @@ def save_globe_data_region(orbit_number, savefig=True):
 
 if __name__ == '__main__':
     load_iuvs_spice(True)
-    from iuvtools.info import get_orbit_sza_apo_90
-    #orbit_arr = get_orbit_sza_apo_90()
-    orbit_arr = range(3200, 12000)#[849]
+    sorbit = int(sys.argv[1])
+    norbit = int(sys.argv[2])
+    eorbit = sorbit + norbit
+    orbit_arr = range(sorbit, eorbit)#[849]
     error_orbit = []
     for iorbit_number in orbit_arr:
         #try:
