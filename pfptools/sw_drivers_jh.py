@@ -38,6 +38,9 @@ def get_sw_driver_apo(orbit_number):
     Dt_apo_aftr = get_Dt_apo(orbit_number+1)
     dic_sw = get_sw_drivers_sav()
     timeDt_sw = dic_sw['timeDt']
+    if Dt_apo is None:
+        print('---- Dt_apo is None, returning None ----')
+        return None
     idxDt = nnDt(timeDt_sw, Dt_apo)
     sw_driver = {ikey:dic_sw[ikey].T[idxDt] for ikey in dic_sw.keys()}
     if timeDt_sw[idxDt] < Dt_apo_prev or timeDt_sw[idxDt] > Dt_apo_aftr:

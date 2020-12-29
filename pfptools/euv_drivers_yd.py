@@ -38,6 +38,9 @@ def get_euv_driver_apo(orbit_number):
     Dt_apo_aftr = get_Dt_apo(orbit_number+1)
     dic_euv = get_euv_drivers_sav()
     timeDt_euv = dic_euv['timeDt']
+    if Dt_apo is None:
+        print('---- Dt_apo is None, returning None ----')
+        return None
     idxDt = nnDt(timeDt_euv, Dt_apo)
     euv_driver = {ikey:dic_euv[ikey].T[idxDt] for ikey in dic_euv.keys()}
     if timeDt_euv[idxDt] < Dt_apo_prev or timeDt_euv[idxDt] > Dt_apo_aftr:
