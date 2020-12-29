@@ -32,14 +32,22 @@ def get_dic_orbfiles():
 def get_Dt_peri(orbit_number):
     df = get_df_orbfiles()
     df_selec = df[df['orbit_number'] == orbit_number]
-    Dt_peri = pd.to_datetime(df_selec['utc_peri']).tolist()[0].to_pydatetime()
-    return Dt_peri
+    if len(df_selec) == 0:
+        print('---- Seems no orbit info in spk kernel ----')
+        return None
+    else:
+        Dt_peri = pd.to_datetime(df_selec['utc_peri']).tolist()[0].to_pydatetime()
+        return Dt_peri
 
 def get_Dt_apo(orbit_number):
     df = get_df_orbfiles()
     df_selec = df[df['orbit_number'] == orbit_number]
-    Dt_apo = pd.to_datetime(df_selec['utc_apo']).tolist()[0].to_pydatetime()
-    return Dt_apo
+    if len(df_selec) == 0:
+        print('---- Seems no orbit info in spk kernel ----')
+        return None
+    else:
+        Dt_apo = pd.to_datetime(df_selec['utc_apo']).tolist()[0].to_pydatetime()
+        return Dt_apo
 
 def get_Dtlim(orbit_number, center='periapse'):
     if center == 'periapse':
@@ -103,14 +111,10 @@ class OrbitInfo:
         return dic
 
     def get_Dt_peri(self, orbit_number):
-        df_selec = self.df[self.df['orbit_number'] == orbit_number]
-        Dt_peri = pd.to_datetime(df_selec['utc_peri']).tolist()[0].to_pydatetime()
-        return Dt_peri
+        return get_Dt_peri(orbit_number)
 
     def get_Dt_apo(self, orbit_number):
-        df_selec = self.df[self.df['orbit_number'] == orbit_number]
-        Dt_apo = pd.to_datetime(df_selec['utc_apo']).tolist()[0].to_pydatetime()
-        return Dt_apo
+        return get_Dt_apo(orbit_number)
 
     def get_Dtlim(self, orbit_number, center='periapse'):
         if center == 'periapse':
