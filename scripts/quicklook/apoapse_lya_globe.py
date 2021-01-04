@@ -123,15 +123,15 @@ def quicklook_apoapse_globe(orbit_number):
             if primary_is_nan(hdul):
                 nan_ok = False
                 continue
-            if echelle_place_ok(hdul) is False:
-                echelle_ok = False
-                continue
+            #if echelle_place_ok(hdul) is False:
+            #    echelle_ok = False
+            #    continue
             glb.mesh_data(hdul) ## add hdul in a mesh
 
         if nan_ok and echelle_ok:
             fig = plt.figure(figsize=(6, 6))
             ax = fig.add_subplot(111)
-            mesh = glb.plot(ax=ax, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=30))
+            mesh = glb.plot(ax=ax, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=10))
             ax.set_xlabel('[km]')
             ax.set_ylabel('[km]')
             ax.set_aspect(1)
