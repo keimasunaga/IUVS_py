@@ -416,7 +416,7 @@ def save_globe_data(orbit_number):
             Ls_lim = [Ls[0], Ls[1]]
             Ls_mean = circmean(Ls, high=360, low=0)
 
-            dic_iuvs = {'orbit_number':orbit_number,
+            dic_iuvs = {'orbit_number':orbit_number, 'file_version':apoinfo.file_version,
                         'length':glb.xlength, 'pixres':glb.pixres, 'npixel':glb.xsize,
                         'x':glb.xdist, 'y':glb.ydist,
                         'data':glb.databin, 'sza':glb.szabin, 'lat':glb.latbin, 'lon':glb.lonbin, 'lt':glb.ltbin,
@@ -616,6 +616,7 @@ def save_globe_data_region(orbit_number, savefig=True):
         Ls_mean = dic_iuvs['Ls_mean']
         x = dic_iuvs['x']
         y = dic_iuvs['y']
+        file_version = dic_iuvs['file_version']
 
         # set bool for limb regions
         bool_alt_limb = (alt>100)&(alt<=200)  ## boolen to select limb region (100-200km)
@@ -652,10 +653,10 @@ def save_globe_data_region(orbit_number, savefig=True):
             plt.close()
             fig, ax = plt.subplots(4,2,figsize=(10,15))
             ax[3,1].remove()
-
-            fig.suptitle('Orbit ' + '{:05d}'.format(orbit_number)+ '\n'+timestring_apo + '\n SZA_SC=' + '{:.1f}'.format(sc_sza_apo) + '\n Ls=' + '{:.1f}'.format(Ls_mean), y=0.95)
+            fig.suptitle('Orbit ' + '{:05d}'.format(orbit_number)+ ' (' + file_version+')'+ '\n'+timestring_apo + '\n SZA_SC=' + '{:.1f}'.format(sc_sza_apo) + '\n Ls=' + '{:.1f}'.format(Ls_mean), y=0.95)
+            #fig.suptitle('Orbit ' + '{:05d}'.format(orbit_number)+ '\n'+timestring_apo + '\n SZA_SC=' + '{:.1f}'.format(sc_sza_apo) + '\n Ls=' + '{:.1f}'.format(Ls_mean), y=0.95)
             ax[0,0].set_title('Brightness')
-            mesh00 = ax[0,0].pcolormesh(x, y, data, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0))
+            mesh00 = ax[0,0].pcolormesh(x, y, data, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=10))
             divider00 = make_axes_locatable(ax[0,0])
             cax00 = divider00.append_axes("right", size="5%", pad=0.05)
             cb00 = plt.colorbar(mesh00, cax=cax00)
