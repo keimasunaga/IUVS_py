@@ -594,7 +594,7 @@ def get_dic_df_disk(dic_iuvs, bool_alt, bool_sza):
 
 def save_globe_data_region(orbit_number, savefig=True):
     # Load saved data
-    dicpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza90_esw90/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/npy/'
+    dicpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza_all/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/npy/'
     dname_save = 'orbit_' + '{:05d}'.format(orbit_number) + '.npy'
     if os.path.isfile(dicpath+dname_save):
         dic = np.load(dicpath + dname_save, allow_pickle=True).item()
@@ -618,104 +618,109 @@ def save_globe_data_region(orbit_number, savefig=True):
         y = dic_iuvs['y']
         file_version = dic_iuvs['file_version']
 
-        # set bool for limb regions
-        bool_alt_limb = (alt>100)&(alt<=200)  ## boolen to select limb region (100-200km)
-        bool_alt_limb2 = (alt>200)&(alt<=300) ## boolen to select limb region (200-300km)
-        bool_szaxy = [np.abs(sza_xy)>150, (sza_xy>=-150)&(sza_xy<-90), (sza_xy>=-90)&(sza_xy<-30),
-                     (sza_xy>=-30)&(sza_xy<30), (sza_xy>=30)&(sza_xy<90), (sza_xy>=90)&(sza_xy<150)]
-        dic_df_limb = get_dic_df(dic_iuvs, bool_alt_limb, bool_szaxy)
-        dic_df_limb2 = get_dic_df(dic_iuvs, bool_alt_limb2, bool_szaxy)
+        # efield_angle at 0 (origin). This is used to judge if the efield lies in the instrument plane.
+        efield_angle_origin = efield_angle[np.where(np.abs(y) == np.abs(y).min()), np.where(np.abs(x) == np.abs(x).min())]
+        print(efield_angle_origin)
+        if (efield_angle_origin >= 70) & (efield_angle_origin <= 110): # 90+/-20deg
 
-        # set bool for disk regions
-        bool_alt_disk = (alt==0) ## boolen to select disk region
-        bool_sza = [sza<=30, (sza>30)&(sza<=60), (sza>60)&(sza<=90),
-                   (sza>90)&(sza<=120), (sza>120)&(sza<=150), (sza>150)&(sza<=180)]
-        dic_df_disk = get_dic_df_disk(dic_iuvs, bool_alt_disk, bool_sza)
+            # set bool for limb regions
+            bool_alt_limb = (alt>100)&(alt<=200)  ## boolen to select limb region (100-200km)
+            bool_alt_limb2 = (alt>200)&(alt<=300) ## boolen to select limb region (200-300km)
+            bool_szaxy = [np.abs(sza_xy)>150, (sza_xy>=-150)&(sza_xy<-90), (sza_xy>=-90)&(sza_xy<-30),
+                         (sza_xy>=-30)&(sza_xy<30), (sza_xy>=30)&(sza_xy<90), (sza_xy>=90)&(sza_xy<150)]
+            dic_df_limb = get_dic_df(dic_iuvs, bool_alt_limb, bool_szaxy)
+            dic_df_limb2 = get_dic_df(dic_iuvs, bool_alt_limb2, bool_szaxy)
 
-        dic_save = {'dic_df_limb':dic_df_limb, 'dic_df_limb2':dic_df_limb2, 'dic_df_disk':dic_df_disk}
+            # set bool for disk regions
+            bool_alt_disk = (alt==0) ## boolen to select disk region
+            bool_sza = [sza<=30, (sza>30)&(sza<=60), (sza>60)&(sza<=90),
+                       (sza>90)&(sza<=120), (sza>120)&(sza<=150), (sza>150)&(sza<=180)]
+            dic_df_disk = get_dic_df_disk(dic_iuvs, bool_alt_disk, bool_sza)
 
-        savepath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza90_esw90/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/regions/'
-        savename = 'orbit_' + '{:05d}'.format(orbit_number)
-        if not os.path.exists(savepath):
-            os.makedirs(savepath)
-        np.save(savepath+savename, dic_save)
+            dic_save = {'dic_df_limb':dic_df_limb, 'dic_df_limb2':dic_df_limb2, 'dic_df_disk':dic_df_disk, 'efield_angle_origin':efield_angle_origin}
 
-        if savefig:
-            # Input NaN into bins outside the limited altitude range for geometry plots
-            alt_lim_geo = (alt>=0)&(alt<=200)
-            sza = np.where(alt_lim_geo, sza, np.nan)
-            lat = np.where(alt_lim_geo, lat, np.nan)
-            lon = np.where(alt_lim_geo, lon, np.nan)
-            sza_xy = np.where(alt_lim_geo, sza_xy, np.nan)
-            lt = np.where(alt_lim_geo, lt, np.nan)
-            efield_angle = np.where(alt_lim_geo, efield_angle, np.nan)
-            # plot
-            plt.close()
-            fig, ax = plt.subplots(4,2,figsize=(10,15))
-            ax[3,1].remove()
-            fig.suptitle('Orbit ' + '{:05d}'.format(orbit_number)+ ' (' + file_version+')'+ '\n'+timestring_apo + '\n SZA_SC=' + '{:.1f}'.format(sc_sza_apo) + '\n Ls=' + '{:.1f}'.format(Ls_mean), y=0.95)
-            #fig.suptitle('Orbit ' + '{:05d}'.format(orbit_number)+ '\n'+timestring_apo + '\n SZA_SC=' + '{:.1f}'.format(sc_sza_apo) + '\n Ls=' + '{:.1f}'.format(Ls_mean), y=0.95)
-            ax[0,0].set_title('Brightness')
-            mesh00 = ax[0,0].pcolormesh(x, y, data, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=10))
-            divider00 = make_axes_locatable(ax[0,0])
-            cax00 = divider00.append_axes("right", size="5%", pad=0.05)
-            cb00 = plt.colorbar(mesh00, cax=cax00)
-
-            ax[1,0].set_title('Solar Zenith Angle')
-            mesh10 = ax[1,0].pcolormesh(x, y, sza, vmin=0, vmax=180, cmap=plt.get_cmap('magma_r', 18))
-            divider10 = make_axes_locatable(ax[1,0])
-            cax10 = divider10.append_axes("right", size="5%", pad=0.05)
-            cb10 = plt.colorbar(mesh10, cax=cax10)
-
-            ax[2,0].set_title('SZA_xy')
-            mesh20 = ax[2,0].pcolormesh(x, y, sza_xy, vmin=-180, vmax=180, cmap=plt.get_cmap('coolwarm', 36))
-            divider20 = make_axes_locatable(ax[2,0])
-            cax20 = divider20.append_axes("right", size="5%", pad=0.05)
-            cb20 = plt.colorbar(mesh20, cax=cax20)
-
-            ax[3,0].set_title('Angle wrt E-field')
-            mesh30 = ax[3,0].pcolormesh(x, y, efield_angle, vmin=0, vmax=180, cmap=plt.get_cmap('bwr_r', 18))
-            divider30 = make_axes_locatable(ax[3,0])
-            cax30 = divider30.append_axes("right", size="5%", pad=0.05)
-            cb30 = plt.colorbar(mesh30, cax=cax30)
-
-            ax[0,1].set_title('Local Time')
-            mesh01 = ax[0,1].pcolormesh(x, y, lt, vmin=0, vmax=24, cmap=plt.get_cmap('twilight_shifted', 24))
-            divider01 = make_axes_locatable(ax[0,1])
-            cax01 = divider01.append_axes("right", size="5%", pad=0.05)
-            cb01 = plt.colorbar(mesh01, cax=cax01)
-
-            ax[1,1].set_title('Longitude')
-            mesh11 = ax[1,1].pcolormesh(x, y, lon, vmin=0, vmax=360, cmap=plt.get_cmap('twilight', 36))
-            divider11 = make_axes_locatable(ax[1,1])
-            cax11 = divider11.append_axes("right", size="5%", pad=0.05)
-            cb11 = plt.colorbar(mesh11, cax=cax11)
-
-            ax[2,1].set_title('Latitude')
-            mesh21 = ax[2,1].pcolormesh(x, y, lat, vmin=-90, vmax=90, cmap=plt.get_cmap('coolwarm', 18))
-            #divider21 = make_axes_locatable(ax[2,1])
-            #cax21 = divider21.append_axes("right", size="5%", pad=0.05)
-            cb21 = plt.colorbar(mesh21, ax=ax[2,1], pad=0.05)#cax=cax21)
-
-            [[jax.set_xlabel('[km]') for jax in iax] for iax in ax]
-            [[jax.set_ylabel('[km]') for jax in iax] for iax in ax]
-            [[jax.set_aspect(1) for jax in iax] for iax in ax]
-
-            cb00.set_label('[kR]',rotation=270, labelpad=10)
-            cb10.set_label('[degree]',rotation=270, labelpad=10)
-            cb20.set_label('[degree]',rotation=270, labelpad=10)
-            cb30.set_label('[degree]',rotation=270, labelpad=10)
-            cb01.set_label('[hour]',rotation=270, labelpad=10)
-            cb11.set_label('[degree]',rotation=270, labelpad=10)
-            cb21.set_label('[degree]',rotation=270, labelpad=10)
-
-            fig.subplots_adjust(hspace=0.3, wspace=0.5)
-
-            figpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza90_esw90/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/fig/'
+            savepath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza90_esw90/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/regions/'
             savename = 'orbit_' + '{:05d}'.format(orbit_number)
-            if not os.path.exists(figpath):
-                os.makedirs(figpath)
-            plt.savefig(figpath+savename)
+            if not os.path.exists(savepath):
+                os.makedirs(savepath)
+            np.save(savepath+savename, dic_save)
+
+            if savefig:
+                # Input NaN into bins outside the limited altitude range for geometry plots
+                alt_lim_geo = (alt>=0)&(alt<=200)
+                sza = np.where(alt_lim_geo, sza, np.nan)
+                lat = np.where(alt_lim_geo, lat, np.nan)
+                lon = np.where(alt_lim_geo, lon, np.nan)
+                sza_xy = np.where(alt_lim_geo, sza_xy, np.nan)
+                lt = np.where(alt_lim_geo, lt, np.nan)
+                efield_angle = np.where(alt_lim_geo, efield_angle, np.nan)
+                # plot
+                plt.close()
+                fig, ax = plt.subplots(4,2,figsize=(10,15))
+                ax[3,1].remove()
+                fig.suptitle('Orbit ' + '{:05d}'.format(orbit_number)+ ' (' + file_version+')'+ '\n'+timestring_apo + '\n SZA_SC=' + '{:.1f}'.format(sc_sza_apo) + '\n Ls=' + '{:.1f}'.format(Ls_mean), y=0.95)
+                #fig.suptitle('Orbit ' + '{:05d}'.format(orbit_number)+ '\n'+timestring_apo + '\n SZA_SC=' + '{:.1f}'.format(sc_sza_apo) + '\n Ls=' + '{:.1f}'.format(Ls_mean), y=0.95)
+                ax[0,0].set_title('Brightness')
+                mesh00 = ax[0,0].pcolormesh(x, y, data, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=10))
+                divider00 = make_axes_locatable(ax[0,0])
+                cax00 = divider00.append_axes("right", size="5%", pad=0.05)
+                cb00 = plt.colorbar(mesh00, cax=cax00)
+
+                ax[1,0].set_title('Solar Zenith Angle')
+                mesh10 = ax[1,0].pcolormesh(x, y, sza, vmin=0, vmax=180, cmap=plt.get_cmap('magma_r', 18))
+                divider10 = make_axes_locatable(ax[1,0])
+                cax10 = divider10.append_axes("right", size="5%", pad=0.05)
+                cb10 = plt.colorbar(mesh10, cax=cax10)
+
+                ax[2,0].set_title('SZA_xy')
+                mesh20 = ax[2,0].pcolormesh(x, y, sza_xy, vmin=-180, vmax=180, cmap=plt.get_cmap('coolwarm', 36))
+                divider20 = make_axes_locatable(ax[2,0])
+                cax20 = divider20.append_axes("right", size="5%", pad=0.05)
+                cb20 = plt.colorbar(mesh20, cax=cax20)
+
+                ax[3,0].set_title('Angle wrt E-field')
+                mesh30 = ax[3,0].pcolormesh(x, y, efield_angle, vmin=0, vmax=180, cmap=plt.get_cmap('bwr_r', 18))
+                divider30 = make_axes_locatable(ax[3,0])
+                cax30 = divider30.append_axes("right", size="5%", pad=0.05)
+                cb30 = plt.colorbar(mesh30, cax=cax30)
+
+                ax[0,1].set_title('Local Time')
+                mesh01 = ax[0,1].pcolormesh(x, y, lt, vmin=0, vmax=24, cmap=plt.get_cmap('twilight_shifted', 24))
+                divider01 = make_axes_locatable(ax[0,1])
+                cax01 = divider01.append_axes("right", size="5%", pad=0.05)
+                cb01 = plt.colorbar(mesh01, cax=cax01)
+
+                ax[1,1].set_title('Longitude')
+                mesh11 = ax[1,1].pcolormesh(x, y, lon, vmin=0, vmax=360, cmap=plt.get_cmap('twilight', 36))
+                divider11 = make_axes_locatable(ax[1,1])
+                cax11 = divider11.append_axes("right", size="5%", pad=0.05)
+                cb11 = plt.colorbar(mesh11, cax=cax11)
+
+                ax[2,1].set_title('Latitude')
+                mesh21 = ax[2,1].pcolormesh(x, y, lat, vmin=-90, vmax=90, cmap=plt.get_cmap('coolwarm', 18))
+                #divider21 = make_axes_locatable(ax[2,1])
+                #cax21 = divider21.append_axes("right", size="5%", pad=0.05)
+                cb21 = plt.colorbar(mesh21, ax=ax[2,1], pad=0.05)#cax=cax21)
+
+                [[jax.set_xlabel('[km]') for jax in iax] for iax in ax]
+                [[jax.set_ylabel('[km]') for jax in iax] for iax in ax]
+                [[jax.set_aspect(1) for jax in iax] for iax in ax]
+
+                cb00.set_label('[kR]',rotation=270, labelpad=10)
+                cb10.set_label('[degree]',rotation=270, labelpad=10)
+                cb20.set_label('[degree]',rotation=270, labelpad=10)
+                cb30.set_label('[degree]',rotation=270, labelpad=10)
+                cb01.set_label('[hour]',rotation=270, labelpad=10)
+                cb11.set_label('[degree]',rotation=270, labelpad=10)
+                cb21.set_label('[degree]',rotation=270, labelpad=10)
+
+                fig.subplots_adjust(hspace=0.3, wspace=0.5)
+
+                figpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza90_esw90/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/fig/'
+                savename = 'orbit_' + '{:05d}'.format(orbit_number)
+                if not os.path.exists(figpath):
+                    os.makedirs(figpath)
+                plt.savefig(figpath+savename)
     else:
         print('No file found at orbit #'+'{:05d}'.format(orbit_number)+ ', skipping')
 
@@ -730,7 +735,7 @@ if __name__ == '__main__':
     for iorbit_number in orbit_arr:
         #try:
         print('{:05d}'.format(iorbit_number))
-        save_globe_data(iorbit_number)
+        #save_globe_data(iorbit_number)
         save_globe_data_region(iorbit_number)
         #except:
         #print('Error caused, skipping orbit'+str(iorbit_number))
