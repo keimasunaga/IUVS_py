@@ -13,7 +13,7 @@ from maven_iuvs.graphics import H_colormap
 from maven_iuvs.time import find_segment_et, et2datetime
 from maven_iuvs.spice import load_iuvs_spice
 
-from variables import saveloc
+from variables import saveloc, spiceloc
 from iuvdata_l1b import ApoapseInfo, ApoapseSwath, FieldAngleGeo
 from common.tools import RunTime
 from common import circular
@@ -205,7 +205,6 @@ def save_globe_data_region(orbit_number, savefig=True):
 
         # efield_angle at 0 (origin). This is used to judge if the efield lies in the instrument plane.
         efield_angle_origin = efield_angle[np.where(np.abs(y) == np.abs(y).min()), np.where(np.abs(x) == np.abs(x).min())]
-        print(efield_angle_origin)
         if (efield_angle_origin >= 70) & (efield_angle_origin <= 110): # 90+/-20deg
 
             # set bool for limb regions
@@ -311,18 +310,13 @@ def save_globe_data_region(orbit_number, savefig=True):
 
 
 if __name__ == '__main__':
-    load_iuvs_spice(True)
+    load_iuvs_spice(spiceloc, load_long_allTrue)
     sorbit = int(sys.argv[1])
     norbit = int(sys.argv[2])
     eorbit = sorbit + norbit
     orbit_arr = range(sorbit, eorbit)#[849]
     error_orbit = []
     for iorbit_number in orbit_arr:
-        #try:
         print('{:05d}'.format(iorbit_number))
-        #save_globe_data(iorbit_number)
         save_globe_data_region(iorbit_number)
-        #except:
-        #print('Error caused, skipping orbit'+str(iorbit_number))
-        #error_orbit.append(iorbit_number)
         plt.close()
