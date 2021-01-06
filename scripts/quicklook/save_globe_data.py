@@ -426,7 +426,7 @@ def save_globe_data(orbit_number):
                         'Ls_mean':Ls_mean, 'Ls_lim':Ls_lim}
 
             dic_save = {'dic_iuvs':dic_iuvs, 'dic_sw':dic_sw, 'dic_euv':dic_euv}
-            dicpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data_sza_all/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/npy/'
+            dicpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data/all/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/npy/'
             dname_save = 'orbit_' + '{:05d}'.format(orbit_number)
             if not os.path.exists(dicpath):
                 os.makedirs(dicpath)
