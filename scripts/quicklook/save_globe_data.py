@@ -7,15 +7,15 @@ import sys
 from scipy.linalg import hadamard, subspace_angles
 from scipy.stats import circmean, circstd
 
+from maven_iuvs.geometry import beta_flip
+from maven_iuvs.graphics import H_colormap
+from PyUVS.time import find_segment_et, et2datetime
+from maven_iuvs.spice import load_iuvs_spice
 
-from variables import saveloc
-from PyUVS.geometry import beta_flip
-from PyUVS.graphics import H_colormap
+from variables import saveloc, spiceloc, iuvdataloc
 from iuvdata_l1b import ApoapseInfo, ApoapseSwath, FieldAngleGeo
 from common.tools import RunTime
 from common import circular
-from PyUVS.time import find_segment_et, et2datetime
-from PyUVS.spice import load_iuvs_spice
 from iuvtools.time import get_et
 from iuvtools.geometry import get_sc_sza, PixelTransCoord
 from iuvtools.info import get_solar_lon
@@ -114,7 +114,9 @@ class PixelGlobeAll:
                 mat_to_inst  = np.array([vx, vy, vspcnorm])
                 vsun_norm = vsun/np.linalg.norm(vsun)
                 vsun_inst = np.matmul(mat_to_inst, vsun_norm)
-                vsun_inst_2d = np.array([vsun_inst[0], vsun_inst[1]])/np.sqrt(vsun_inst[0]**2 + vsun_inst[1]**2)
+                #vsun_inst_2d = np.array([vsun_inst[0], vsun_inst[1]])/np.sqrt(vsun_inst[0]**2 + vsun_inst[1]**2)
+                vsun_inst_xy = np.array([vsun_inst[0], vsun_inst[1], 0])
+                vsun_inst_xy_norm = vsun_inst_xy/np.linalg.norm(vsun_inst_xy)
                 vpix_from_pla = vpix_from_pla_all[i]
 
                 for j in range(n_spa):
@@ -125,10 +127,13 @@ class PixelGlobeAll:
                     lat = lat_arr[i,j,4]
                     lon = lon_arr[i,j,4]
                     vpix_from_pla_inst = np.matmul(mat_to_inst, vpix_from_pla[:,j,4])
-                    vpix_from_pla_inst_2d = np.array([vpix_from_pla_inst[0], vpix_from_pla_inst[1]])/np.sqrt(vpix_from_pla_inst[0]**2 + vpix_from_pla_inst[1]**2)
-                    r_xy = np.sqrt(vpix_from_pla_inst[0]**2 + vpix_from_pla_inst[1]**2)
-                    vpix_from_pla_inst_norm = vpix_from_pla_inst/r_xy
-                    sza_xy = get_angle_vectors_2d(vsun_inst, vpix_from_pla_inst_norm)#np.rad2deg(np.arctan2(np.dot(vsun_inst, np.cross(vsun_inst, vpix_from_pla_inst_norm)), np.dot(vsun_inst, vpix_from_pla_inst_norm)))
+                    #vpix_from_pla_inst_2d = np.array([vpix_from_pla_inst[0], vpix_from_pla_inst[1], 0])/np.sqrt(vpix_from_pla_inst[0]**2 + vpix_from_pla_inst[1]**2)
+                    #r_xy = np.sqrt(vpix_from_pla_inst[0]**2 + vpix_from_pla_inst[1]**2)
+                    #vpix_from_pla_inst_norm = vpix_from_pla_inst_2d/r_xy
+                    vpix_from_pla_inst_xy = np.array([vpix_from_pla_inst[0], vpix_from_pla_inst[1], 0])
+                    vpix_from_pla_inst_xy_norm = vpix_from_pla_inst_xy/np.linalg.norm(vpix_from_pla_inst_xy)
+                    #sza_xy = get_angle_vectors_2d(vsun_inst, vpix_from_pla_inst_norm)#np.rad2deg(np.arctan2(np.dot(vsun_inst, np.cross(vsun_inst, vpix_from_pla_inst_norm)), np.dot(vsun_inst, vpix_from_pla_inst_norm)))
+                    sza_xy = get_angle_vectors_2d(vsun_inst_xy_norm, vpix_from_pla_inst_xy_norm)
 
                     if fieldangle_obj.field_mso is not None:
                         field_angle = fieldangle_obj.data[i,j]
@@ -360,7 +365,7 @@ class PixelGlobeAll:
             mesh = ax.pcolormesh(x, y, z, vmin=0, vmax=180, **kwargs)
         return mesh
 
-def save_globe_data(orbit_number):
+def save_globe_data(orbit_number, savefig=True):
     glb = PixelGlobeAll(orbit_number)
     glb.set_other_orbit(orbit_number - 1)
     apoinfo = glb.get_apoinfo()
@@ -368,6 +373,7 @@ def save_globe_data(orbit_number):
     if apoinfo.n_files > 0:
         et_apo = find_segment_et(orbit_number)
         Dt_apo = et2datetime(et_apo)
+        timestring_apo = Dt_apo.strftime("%Y-%m-%d %H:%M:%S")
         print('DTAPO',Dt_apo)
 
         et = []
@@ -410,6 +416,8 @@ def save_globe_data(orbit_number):
             ## save obs info
             et = np.concatenate(et).ravel()
             Dt_lim = [et2datetime(et[0]), et2datetime(et[-1])]
+            timestring_0 = Dt_lim[0].strftime("%Y-%m-%d %H:%M:%S")
+            timestring_1 = Dt_lim[1].strftime("%Y-%m-%d %H:%M:%S")
             sc_sza = np.concatenate(sc_sza).ravel()
             sc_sza_lim = [sc_sza[0], sc_sza[-1]]
             sc_sza_apo = np.interp(et_apo, et, sc_sza)
@@ -426,15 +434,105 @@ def save_globe_data(orbit_number):
                         'Ls_mean':Ls_mean, 'Ls_lim':Ls_lim}
 
             dic_save = {'dic_iuvs':dic_iuvs, 'dic_sw':dic_sw, 'dic_euv':dic_euv}
-            dicpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data/all/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/npy/'
+            dicpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data/all/npy/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/'
             dname_save = 'orbit_' + '{:05d}'.format(orbit_number)
             if not os.path.exists(dicpath):
                 os.makedirs(dicpath)
             np.save(dicpath + dname_save, dic_save)
+
+            if savefig:
+
+                # Input NaN into bins outside the limited altitude range for geometry plots
+                alt_lim_geo = (glb.altbin>=0)&(glb.altbin<=200)
+                sza = np.where(alt_lim_geo, glb.szabin, np.nan)
+                lat = np.where(alt_lim_geo, glb.latbin, np.nan)
+                lon = np.where(alt_lim_geo, glb.lonbin, np.nan)
+                sza_xy = np.where(alt_lim_geo, glb.szaxybin, np.nan)
+                lt = np.where(alt_lim_geo, glb.ltbin, np.nan)
+                efield_angle = np.where(alt_lim_geo, glb.fieldanglebin, np.nan)
+                data = glb.databin
+                alt = glb.altbin
+                x = glb.xdist
+                y = glb.ydist
+
+                # plot
+                plt.close()
+                fig, ax = plt.subplots(4,2,figsize=(10,15))
+                fig.suptitle('Orbit ' + '{:05d}'.format(orbit_number)+ ' (' + apoinfo.file_version+')'+ '\n'+timestring_0 + ' -> ' +timestring_apo+' -> '+ timestring_1 + '\n SZA_SC=' + '{:.1f}'.format(sc_sza_apo) + '\n Ls=' + '{:.1f}'.format(Ls_mean), y=0.95)
+
+                ax[0,0].set_title('Brightness')
+                mesh00 = ax[0,0].pcolormesh(x, y, data, cmap=H_colormap(), norm=mpl.colors.PowerNorm(gamma=1/2, vmin=0, vmax=10))
+                divider00 = make_axes_locatable(ax[0,0])
+                cax00 = divider00.append_axes("right", size="5%", pad=0.05)
+                cb00 = plt.colorbar(mesh00, cax=cax00)
+
+                ax[1,0].set_title('Solar Zenith Angle')
+                mesh10 = ax[1,0].pcolormesh(x, y, sza, vmin=0, vmax=180, cmap=plt.get_cmap('magma_r', 18))
+                divider10 = make_axes_locatable(ax[1,0])
+                cax10 = divider10.append_axes("right", size="5%", pad=0.05)
+                cb10 = plt.colorbar(mesh10, cax=cax10)
+
+                ax[2,0].set_title('SZA_xy')
+                mesh20 = ax[2,0].pcolormesh(x, y, sza_xy, vmin=-180, vmax=180, cmap=plt.get_cmap('coolwarm', 36))
+                divider20 = make_axes_locatable(ax[2,0])
+                cax20 = divider20.append_axes("right", size="5%", pad=0.05)
+                cb20 = plt.colorbar(mesh20, cax=cax20)
+
+                ax[3,0].set_title('Angle wrt E-field')
+                mesh30 = ax[3,0].pcolormesh(x, y, efield_angle, vmin=0, vmax=180, cmap=plt.get_cmap('bwr_r', 18))
+                divider30 = make_axes_locatable(ax[3,0])
+                cax30 = divider30.append_axes("right", size="5%", pad=0.05)
+                cb30 = plt.colorbar(mesh30, cax=cax30)
+
+                ax[0,1].set_title('Altitude')
+                mesh01 = ax[0,1].pcolormesh(x, y, alt, vmin=0, cmap=plt.get_cmap('bone'))
+                divider01 = make_axes_locatable(ax[0,1])
+                cax01 = divider01.append_axes("right", size="5%", pad=0.05)
+                cb01 = plt.colorbar(mesh01, cax=cax01)
+
+                ax[1,1].set_title('Local Time')
+                mesh11 = ax[1,1].pcolormesh(x, y, lt, vmin=0, vmax=24, cmap=plt.get_cmap('twilight_shifted', 24))
+                divider11 = make_axes_locatable(ax[1,1])
+                cax11 = divider11.append_axes("right", size="5%", pad=0.05)
+                cb11 = plt.colorbar(mesh11, cax=cax11)
+
+                ax[2,1].set_title('Longitude')
+                mesh21 = ax[2,1].pcolormesh(x, y, lon, vmin=0, vmax=360, cmap=plt.get_cmap('twilight', 36))
+                divider21 = make_axes_locatable(ax[2,1])
+                cax21 = divider21.append_axes("right", size="5%", pad=0.05)
+                cb21 = plt.colorbar(mesh21, cax=cax21)
+
+                ax[3,1].set_title('Latitude')
+                mesh31 = ax[3,1].pcolormesh(x, y, lat, vmin=-90, vmax=90, cmap=plt.get_cmap('coolwarm', 18))
+                divider31 = make_axes_locatable(ax[3,1])
+                cax31 = divider31.append_axes("right", size="5%", pad=0.05)
+                cb31 = plt.colorbar(mesh31, cax=cax31)
+
+                [[jax.set_xlabel('[km]') for jax in iax] for iax in ax]
+                [[jax.set_ylabel('[km]') for jax in iax] for iax in ax]
+                [[jax.set_aspect(1) for jax in iax] for iax in ax]
+
+                cb00.set_label('[kR]',rotation=270, labelpad=10)
+                cb10.set_label('[degree]',rotation=270, labelpad=10)
+                cb20.set_label('[degree]',rotation=270, labelpad=10)
+                cb30.set_label('[degree]',rotation=270, labelpad=10)
+                cb01.set_label('[km]',rotation=270, labelpad=10)
+                cb11.set_label('[hour]',rotation=270, labelpad=10)
+                cb21.set_label('[degree]',rotation=270, labelpad=10)
+                cb31.set_label('[degree]',rotation=270, labelpad=10)
+
+                fig.subplots_adjust(hspace=0.3, wspace=0.5)
+
+                figpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data/all/fig/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/'
+                savename = 'orbit_' + '{:05d}'.format(orbit_number)
+                if not os.path.exists(figpath):
+                    os.makedirs(figpath)
+                plt.savefig(figpath+savename)
+
         hdul.close()
 
 if __name__ == '__main__':
-    load_iuvs_spice(True)
+    #load_iuvs_spice(spiceloc, True)
     sorbit = int(sys.argv[1])
     norbit = int(sys.argv[2])
     eorbit = sorbit + norbit
