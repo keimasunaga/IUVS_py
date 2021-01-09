@@ -365,6 +365,26 @@ class PixelGlobeAll:
             mesh = ax.pcolormesh(x, y, z, vmin=0, vmax=180, **kwargs)
         return mesh
 
+def get_vsun_apo_inst(hdul):
+    et_apo = find_segment_et(hdul['observation'].data['orbit_number'])
+    et = hdul['integration'].data['et']
+    et_diff = et - et_apo
+    idx_reverse = np.where(et_diff[0:-1]*et_diff[1:] <=0)[0]
+    if np.size(idx_reverse)>0:
+        idx_et_apo = np.where(np.abs(et_diff) == np.min(np.abs(et_diff)))[0][0]
+        vpix = hdul['pixelgeometry'].data[idx_et_apo]['pixel_vec']
+        vsun = hdul['spacecraftgeometry'].data[idx_et_apo]['v_sun']
+        vspc = hdul['spacecraftgeometry'].data[idx_et_apo]['v_spacecraft']
+        vspcnorm = vspc/np.linalg.norm(vspc)
+        vy = hdul['spacecraftgeometry'].data[idx_et_apo]['vy_instrument']
+        vx = np.cross(vy, vspcnorm)
+        mat_to_inst  = np.array([vx, vy, vspcnorm])
+        vsun_norm = vsun/np.linalg.norm(vsun)
+        vsun_inst = np.matmul(mat_to_inst, vsun_norm)
+        return vsun_inst
+    else:
+        return None
+
 def save_globe_data(orbit_number, savefig=True):
     glb = PixelGlobeAll(orbit_number)
     glb.set_other_orbit(orbit_number - 1)
@@ -408,9 +428,12 @@ def save_globe_data(orbit_number, savefig=True):
             et.append(get_et(hdul))
             sc_sza.append(get_sc_sza(hdul))
             Ls.append(get_solar_lon(hdul))
+            if get_vsun_apo_inst(hdul) is not None:
+                vsun_apo_inst = get_vsun_apo_inst(hdul)
+                print(vsun_apo_inst)
 
         if nan_ok and echelle_ok:
-
+            print(vsun_apo_inst)
             glb.mesh_mean()
 
             ## save obs info
@@ -431,7 +454,7 @@ def save_globe_data(orbit_number, savefig=True):
                         'sza_xy':glb.szaxybin, 'efield_angle':glb.fieldanglebin, 'alt':glb.altbin,
                         'Dt_apo':Dt_apo, 'Dt_lim':Dt_lim,
                         'sc_sza_apo':sc_sza_apo, 'sc_sza_lim':sc_sza_lim, 'beta_flip':glb.flip,
-                        'Ls_mean':Ls_mean, 'Ls_lim':Ls_lim}
+                        'Ls_mean':Ls_mean, 'Ls_lim':Ls_lim, 'vsun_apo_inst':vsun_apo_inst}
 
             dic_save = {'dic_iuvs':dic_iuvs, 'dic_sw':dic_sw, 'dic_euv':dic_euv}
             dicpath = saveloc + 'quicklook/apoapse_l1b/Lyman-alpha/globe_data/all/npy/orbit_' + '{:05d}'.format(orbit_number//100 * 100) + '/'
@@ -454,6 +477,15 @@ def save_globe_data(orbit_number, savefig=True):
                 alt = glb.altbin
                 x = glb.xdist
                 y = glb.ydist
+                xmesh, ymesh = np.meshgrid(x,y)
+                vsun_apo_inst_xy = np.array([vsun_apo_inst[1], vsun_apo_inst[0]])
+                vsun_apo_inst_xy_norm = vsun_apo_inst_xy/np.linalg.norm(vsun_apo_inst_xy)
+
+                """ang_rot = np.arctan2(vsun_apo_inst_xy_norm[0], vsun_apo_inst_xy_norm[1])*-180./np.pi*np.pi/180.
+                XAprim = xmesh*np.cos(ang_rot) - ymesh*np.sin(ang_rot)
+                YAprim = xmesh*np.sin(ang_rot) + ymesh*np.cos(ang_rot)
+                sza_xy = np.arctan2((YAprim),(XAprim))*-180./np.pi
+                sza_xy = np.where(alt_lim_geo, sza_xy, np.nan)"""
 
                 # plot
                 plt.close()
