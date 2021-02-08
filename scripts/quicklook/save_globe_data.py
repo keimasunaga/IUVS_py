@@ -369,7 +369,7 @@ def get_vsun_apo_inst(hdul):
     et_apo = find_segment_et(hdul['observation'].data['orbit_number'])
     et = hdul['integration'].data['et']
     et_diff = et - et_apo
-    idx_reverse = np.where(et_diff[0:-1]*et_diff[1:] <=0)[0]
+    idx_reverse = np.where((et_diff[0:-1]*et_diff[1:] <=0)|(et_diff[0:-1]*et_diff[1:] <=1))[0]
     if np.size(idx_reverse)>0:
         idx_et_apo = np.where(np.abs(et_diff) == np.min(np.abs(et_diff)))[0][0]
         vpix = hdul['pixelgeometry'].data[idx_et_apo]['pixel_vec']
@@ -433,7 +433,7 @@ def save_globe_data(orbit_number, savefig=True):
                 print(vsun_apo_inst)
 
         if nan_ok and echelle_ok:
-            
+
             glb.mesh_mean()
 
             ## save obs info
