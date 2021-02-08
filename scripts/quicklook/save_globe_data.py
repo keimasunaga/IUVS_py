@@ -433,7 +433,7 @@ def save_globe_data(orbit_number, savefig=True):
                 print(vsun_apo_inst)
 
         if nan_ok and echelle_ok:
-            print(vsun_apo_inst)
+            
             glb.mesh_mean()
 
             ## save obs info
