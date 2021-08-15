@@ -84,6 +84,8 @@ def quicklook_apoapse(orbit_number, wv0=121.6, wv_width=2.5, savefig=True):
         fname_save = 'orbit_' + '{:05d}'.format(orbit_number) + '.png'
         if savefig:
             plt.savefig(savepath + fname_save)
+            plt.clf()
+            plt.close()
 
 if __name__ == '__main__':
     start_orbit = int(sys.argv[1])
@@ -91,7 +93,7 @@ if __name__ == '__main__':
     orbit_arr = np.arange(n_orbit) + start_orbit
     for iorbit_number in np.arange(n_orbit) + start_orbit:
         quicklook_apoapse(iorbit_number)
-        plt.close()
+        import gc; gc.collect()
 
 
 
