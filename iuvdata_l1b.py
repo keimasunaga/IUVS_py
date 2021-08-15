@@ -4,11 +4,13 @@ import matplotlib as mpl
 from astropy.io import fits
 import spiceypy as spice
 
-from common.tools import quaternion_rotation
+from common.tools import quaternion_rotation, nn, nnDt
+from iuvtools.time import get_timeDt, get_et
 from PyUVS.data import get_apoapse_files as get_swath_info
 from PyUVS.graphics import angle_meshgrid, H_colormap
 from PyUVS.variables import data_directory as dataloc
 from PyUVS.variables import slit_width_deg
+from PyUVS.time import find_segment_et, et2datetime
 from chaffin.integration import fit_line
 
 
@@ -211,6 +213,43 @@ def plot_apoapse_image(orbit_number, wv0=121.6, wv_width=2.5, ax=None, **kwargs)
     ax.set_ylabel('Integrations')
 
     return mesh
+
+
+def get_apoapse_time(orbit_number, epoch_time=False):
+    '''
+    Retruns an apoapse time derived from spice in datetime or epoch time
+
+    Returns
+    -------
+    Dt or et: datetime or epoch time
+        apoapse datetime/epoch time
+    '''
+    et = find_segment_et(orbit_number)
+    Dt = et2datetime(et)
+    return et if epoch_time else Dt
+
+
+def get_nearest_time_apo(orbit_number, epoch=False):
+    """
+    This function picks a time that is nearest to the actual apopase time from apoapse data.
+    input:
+        orbit_number: an orbit number: integer
+    keyword:
+        epoch: returns et (epoch time) if True instead of datetime: boolen, defaults to False
+    returns:
+        a time (datetime or et) nearest to the actual apoapse time
+    """
+    apoinfo = get_apoapseinfo(orbit_number)
+    t_apo = get_apoapse_time(orbit_number, epoch)
+    t_iuv = np.array([])
+    for ith_file, iswath_number in enumerate(apoinfo.swath_number):
+        hdul = apoinfo.get_hdul(ith_file)
+        if epoch:
+            t_iuv = np.append(t_iuv, get_et(hdul))
+        else:
+            t_iuv = np.append(t_iuv, get_timeDt(hdul))
+    idx = nn(t_iuv, t_apo) if epoch else nnDt(t_iuv, t_apo)
+    return t_iuv[idx]
 
 
 class SzaGeo:
