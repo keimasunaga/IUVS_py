@@ -13,7 +13,7 @@ from PyUVS.time import find_segment_et, et2datetime
 from maven_iuvs.spice import load_iuvs_spice
 
 from variables import saveloc, spiceloc, iuvdataloc
-from iuvdata_l1b import ApoapseInfo, ApoapseSwath, FieldAngleGeo
+from iuvdata_l1b import ApoapseInfo, ApoapseSwath, FieldAngleGeo, get_apoapse_time, get_nearest_time_apo
 from common.tools import RunTime
 from common import circular
 from iuvtools.time import get_et
@@ -365,13 +365,12 @@ class PixelGlobeAll:
             mesh = ax.pcolormesh(x, y, z, vmin=0, vmax=180, **kwargs)
         return mesh
 
-def get_vsun_apo_inst(hdul):
-    et_apo = find_segment_et(hdul['observation'].data['orbit_number'])
+def get_vsun_apo_inst(hdul, nearest_et_apo):
+    #et_apo = find_segment_et(hdul['observation'].data['orbit_number'])
     et = hdul['integration'].data['et']
-    et_diff = et - et_apo
-    idx_reverse = np.where((et_diff[0:-1]*et_diff[1:] <=0)|(et_diff[0:-1]*et_diff[1:] <=1))[0]
-    if np.size(idx_reverse)>0:
-        idx_et_apo = np.where(np.abs(et_diff) == np.min(np.abs(et_diff)))[0][0]
+    #import pdb; pdb.set_trace()
+    if nearest_et_apo in et:
+        idx_et_apo = np.where(et == nearest_et_apo)[0][0] #np.where(np.abs(et_diff) == np.min(np.abs(et_diff)))[0][0]
         vpix = hdul['pixelgeometry'].data[idx_et_apo]['pixel_vec']
         vsun = hdul['spacecraftgeometry'].data[idx_et_apo]['v_sun']
         vspc = hdul['spacecraftgeometry'].data[idx_et_apo]['v_spacecraft']
@@ -396,6 +395,8 @@ def save_globe_data(orbit_number, savefig=True):
         timestring_apo = Dt_apo.strftime("%Y-%m-%d %H:%M:%S")
         print('DTAPO',Dt_apo)
 
+        nearest_et_apo = get_nearest_time_apo(orbit_number, epoch=True)
+
         et = []
         sc_sza = []
         Ls = []
@@ -412,6 +413,8 @@ def save_globe_data(orbit_number, savefig=True):
 
         nan_ok = True
         echelle_ok = True
+
+        vsun_apo_inst = None
         for ith_file, iswath_number in enumerate(apoinfo.swath_number):
             hdul = apoinfo.get_hdul(ith_file)
 
@@ -428,9 +431,10 @@ def save_globe_data(orbit_number, savefig=True):
             et.append(get_et(hdul))
             sc_sza.append(get_sc_sza(hdul))
             Ls.append(get_solar_lon(hdul))
-            if get_vsun_apo_inst(hdul) is not None:
-                vsun_apo_inst = get_vsun_apo_inst(hdul)
-                print(vsun_apo_inst)
+            #if get_vsun_apo_inst(hdul, nearest_et_apo) is not None:
+            if vsun_apo_inst is None:
+                vsun_apo_inst = get_vsun_apo_inst(hdul, nearest_et_apo)
+
 
         if nan_ok and echelle_ok:
 
@@ -564,7 +568,7 @@ def save_globe_data(orbit_number, savefig=True):
         hdul.close()
 
 if __name__ == '__main__':
-    #load_iuvs_spice(spiceloc, True)
+    load_iuvs_spice(spiceloc, True)
     sorbit = int(sys.argv[1])
     norbit = int(sys.argv[2])
     eorbit = sorbit + norbit
