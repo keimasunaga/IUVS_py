@@ -102,10 +102,10 @@ def save_orbit_sza_apo_90():
     orbit_number = dic['orbit_number']
     sza_apo = dic['sza_apo']
     orbit_sza90 = orbit_number[np.where((85<sza_apo) & (sza_apo<95))]
-    savepath = '/Users/masunaga/work/python_git/maven/iuvs/notebook/'
+    savepath = saveloc + '/misc_items/'
     np.save(savepath + 'orbit_sza90', orbit_sza90)
 
 def get_orbit_sza_apo_90():
-    savepath = '/Users/masunaga/work/python_git/maven/iuvs/notebook/'
+    savepath = saveloc + '/misc_items/'
     orbit_sza_apo_90 = np.load(savepath + 'orbit_sza90.npy', allow_pickle=True)
     return orbit_sza_apo_90
