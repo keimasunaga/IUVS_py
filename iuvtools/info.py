@@ -74,22 +74,31 @@ def get_sza_apo(orbit_number, get_lim=False):
         else:
             return None
 
-def save_sza_apo_data(sorbit, eorbit):
+def save_sza_apo_data(sorbit, eorbit, update=True):
     orbit_list = []
     sza_apo_list = []
     sza_lim_list = []
-    for iorbit in range(sorbit, eorbit):
-        sza_apo, sza_lim = get_sza_apo(iorbit, get_lim=True)
-        if sza_apo is not None:
-            orbit_list.append(iorbit)
-            sza_apo_list.append(sza_apo)
-            sza_lim_list.append(sza_lim)
+    sblock = int(sorbit/1000)*1000
+    eblock = int((eorbit+1000)/1000)*1000
+    sblocks = range(sblock, eblock, 1000)
 
-    dic = {'orbit_number':np.array(orbit_list), 'sza_apo':np.array(sza_apo_list), 'sza_lim':np.array(sza_lim_list)}
-    savepath = os.path.join(saveloc, 'misc_items/sza_apo_list/')
-    os.makedirs(savepath, exist_ok=True)
-    savename = 'sza_apo_list.npy'
-    np.save(savepath+savename, dic)
+    for iblk in sblocks:
+        isorbit = iblk
+        ieorbit = iblk + 1000
+        orbit_block = str(iblk).zfill(5)
+        
+        for iorbit in range(isorbit, ieorbit):
+            sza_apo, sza_lim = get_sza_apo(iorbit, get_lim=True)
+            if sza_apo is not None:
+                orbit_list.append(iorbit)
+                sza_apo_list.append(sza_apo)
+                sza_lim_list.append(sza_lim)
+
+        dic = {'orbit_number':np.array(orbit_list), 'sza_apo':np.array(sza_apo_list), 'sza_lim':np.array(sza_lim_list)}
+        savepath = os.path.join(saveloc, 'misc_items/sza_apo_list/')
+        os.makedirs(savepath, exist_ok=True)
+        savename = 'sza_apo_orbit_'+orbit_block+'.npy'
+        np.save(savepath+savename, dic)
 
 def get_sza_apo_data():
     savepath = os.path.join(saveloc, 'misc_items/sza_apo_list/')
