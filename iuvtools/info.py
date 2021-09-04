@@ -31,7 +31,7 @@ def dayside(hdul): ## Check if the voltage value is correct later
 
 
 import numpy as np
-import os
+import os, glob
 from datetime import timezone
 
 from PyUVS.time import find_segment_et, et2datetime
@@ -68,25 +68,27 @@ def get_sza_apo(orbit_number, get_lim=False):
         else:
             return sza_apo
     else:
-        print('No files found at orbit #' + str(orbit_number))
+        #print('No files found at orbit #' + str(orbit_number))
         if get_lim:
             return None, None
         else:
             return None
 
-def save_sza_apo_data(sorbit, eorbit, update=True):
-    orbit_list = []
-    sza_apo_list = []
-    sza_lim_list = []
+def save_sza_apo_data(sorbit, eorbit):
+    from common.tools import RunTime
+    RT = RunTime()
+    RT.start()
     sblock = int(sorbit/1000)*1000
-    eblock = int((eorbit+1000)/1000)*1000
+    eblock = int(eorbit/1000)*1000
     sblocks = range(sblock, eblock, 1000)
 
     for iblk in sblocks:
         isorbit = iblk
         ieorbit = iblk + 1000
         orbit_block = str(iblk).zfill(5)
-        
+        orbit_list = []
+        sza_apo_list = []
+        sza_lim_list = []
         for iorbit in range(isorbit, ieorbit):
             sza_apo, sza_lim = get_sza_apo(iorbit, get_lim=True)
             if sza_apo is not None:
@@ -99,12 +101,24 @@ def save_sza_apo_data(sorbit, eorbit, update=True):
         os.makedirs(savepath, exist_ok=True)
         savename = 'sza_apo_orbit_'+orbit_block+'.npy'
         np.save(savepath+savename, dic)
+    RT.stop()
 
-def get_sza_apo_data():
+def get_sza_apo_data(all=True, orbit_number=None):
     savepath = os.path.join(saveloc, 'misc_items/sza_apo_list/')
-    savename = 'sza_apo_list.npy'
-    dic = np.load(savepath+savename, allow_pickle=True).item()
-    return dic
+    if all:
+        fnames = sorted(glob.glob(savepath+'sza_apo_orbit_*'))
+        dic_all = {'orbit_number':np.array([]), 'sza_apo':np.array([]), 'sza_lim':np.array([])}
+        for fname in fnames:
+            dic = np.load(fname, allow_pickle=True).item()
+            for ikey in dic.keys():
+                dic_all[ikey] = np.append(dic_all[ikey], np.load(fname, allow_pickle=True).item()[ikey])
+                #[[dic_all[ikey].append(np.load(fname, allow_pickle=True).item()[ikey]) for ikey in np.load(fname, allow_pickle=True).item().keys()] for fname in fnames]
+        return dic_all
+    else:
+        orbit_block = str(int(orbit_number/1000)*1000).zfill(5)
+        fname = glob.glob(savepath+'sza_apo_orbit_'+orbit_block+'.npy')
+        dic = np.load(fname[0], allow_pickle=True).item()
+        return dic
 
 def save_orbit_sza_apo_90():
     dic = get_sza_apo_data()
